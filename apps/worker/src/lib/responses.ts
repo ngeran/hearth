@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | "not_found"
   | "conflict"
   | "rate_limited"
+  | "hourly_limit"
   | "unsupported_media_type"
   | "payload_too_large"
   | "service_unavailable"

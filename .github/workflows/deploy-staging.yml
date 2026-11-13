@@ -1,7 +1,12 @@
 name: Deploy staging
 
 on:
-  push:
+  # Deploy only after the CI workflow has passed on the exact commit, so a
+  # failing push can never reach staging. Manual dispatch bypasses the gate
+  # by design.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -14,6 +19,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: staging
     timeout-minutes: 20
@@ -23,8 +29,12 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
     steps:
-      - name: Check out repository
+      - name: Check out the commit CI verified
         uses: actions/checkout@v4
+        with:
+          # For workflow_dispatch runs workflow_run is absent; fall back to
+          # the ref the dispatch targeted.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4

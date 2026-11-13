@@ -1,4 +1,6 @@
 import {
+  ACADEMIC_CODE_HOURLY_LIMIT,
+  ACADEMIC_CODE_HOURLY_WINDOW_SECONDS,
   ACADEMIC_CODE_MAX_ATTEMPTS,
   ACADEMIC_CODE_RESEND_COOLDOWN_SECONDS,
   ACADEMIC_CODE_TTL_SECONDS,
@@ -13,7 +15,7 @@ import {
   profilePatchSchema,
   sanitizeImage,
 } from "@hearth/shared";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createDb, type Db } from "../db/client";
@@ -271,6 +273,28 @@ me.post("/academic-email", async (c) => {
     }
   }
 
+  // Cap outbound verification emails per user so one account cannot be used
+  // to email-bomb arbitrary addresses. Only challenges whose mail actually
+  // went out count: failed sends are deleted below.
+  const hourlyCutoff = fromUnixSeconds(toUnixSeconds(now) - ACADEMIC_CODE_HOURLY_WINDOW_SECONDS);
+  const recentChallenges = await db
+    .select({ createdAt: academicVerifications.createdAt })
+    .from(academicVerifications)
+    .where(
+      and(eq(academicVerifications.userId, id), gt(academicVerifications.createdAt, hourlyCutoff)),
+    )
+    .orderBy(desc(academicVerifications.createdAt));
+
+  if (recentChallenges.length >= ACADEMIC_CODE_HOURLY_LIMIT) {
+    const oldest = recentChallenges.at(-1);
+    const elapsedSinceOldest = oldest
+      ? toUnixSeconds(now) - toUnixSeconds(oldest.createdAt)
+      : ACADEMIC_CODE_HOURLY_WINDOW_SECONDS;
+    const remaining = Math.max(1, ACADEMIC_CODE_HOURLY_WINDOW_SECONDS - elapsedSinceOldest);
+    c.header("retry-after", String(remaining));
+    return apiError(c, 429, "hourly_limit", "Too many codes requested this hour. Try again later.");
+  }
+
   const code = generateAcademicCode(c.env);
   const codeHash = await hashAcademicCode(c.env.BETTER_AUTH_SECRET, id, email, code);
   const challengeId = crypto.randomUUID();
@@ -280,16 +304,26 @@ me.post("/academic-email", async (c) => {
     .set({ consumedAt: now })
     .where(and(eq(academicVerifications.userId, id), isNull(academicVerifications.consumedAt)));
 
-  await db.insert(academicVerifications).values({
-    id: challengeId,
-    userId: id,
-    email,
-    codeHash,
-    expiresAt: fromUnixSeconds(toUnixSeconds(now) + ACADEMIC_CODE_TTL_SECONDS),
-    attempts: 0,
-    lastSentAt: now,
-    createdAt: now,
-  });
+  try {
+    await db.insert(academicVerifications).values({
+      id: challengeId,
+      userId: id,
+      email,
+      codeHash,
+      expiresAt: fromUnixSeconds(toUnixSeconds(now) + ACADEMIC_CODE_TTL_SECONDS),
+      attempts: 0,
+      lastSentAt: now,
+      createdAt: now,
+    });
+  } catch (error) {
+    // The partial unique index (migration 0002) makes a concurrent double
+    // request fail here instead of leaving two active challenges.
+    if (error instanceof Error && error.message.includes("UNIQUE constraint failed")) {
+      return apiError(c, 429, "rate_limited", "Wait a minute before requesting another code.");
+    }
+
+    throw error;
+  }
 
   try {
     await createMailer(c.env).send(academicEmailMessage(email, code));

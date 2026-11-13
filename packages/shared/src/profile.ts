@@ -20,6 +20,8 @@ export const ACADEMIC_CODE_LENGTH = 6;
 export const ACADEMIC_CODE_TTL_SECONDS = 10 * 60;
 export const ACADEMIC_CODE_MAX_ATTEMPTS = 5;
 export const ACADEMIC_CODE_RESEND_COOLDOWN_SECONDS = 60;
+export const ACADEMIC_CODE_HOURLY_LIMIT = 5;
+export const ACADEMIC_CODE_HOURLY_WINDOW_SECONDS = 60 * 60;
 
 export const LIFE_STAGES = ["student", "first-time-mover", "independent", "other"] as const;
 export type LifeStage = (typeof LIFE_STAGES)[number];

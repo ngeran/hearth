@@ -37,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { LANGUAGE_STORAGE_KEY, normalizeLanguage } from "@/lib/i18n";
 import {
+  ApiRequestError,
   deleteAccount,
   downloadExport,
   fetchCampuses,
@@ -68,6 +69,7 @@ type AcademicErrorKey =
   | "profile.academic.invalidEmail"
   | "profile.academic.sendFailed"
   | "profile.academic.rateLimited"
+  | "profile.academic.hourlyLimited"
   | "profile.academic.invalidCode"
   | "profile.academic.generic";
 
@@ -668,8 +670,17 @@ function AcademicEmailCard({ me }: { me: MeResponse }) {
       setStep("sent");
       setCode("");
       setCooldown(60);
-    } catch {
-      setErrorKey("profile.academic.sendFailed");
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.status === 429) {
+        if (error.code === "hourly_limit") {
+          setErrorKey("profile.academic.hourlyLimited");
+        } else {
+          setErrorKey("profile.academic.rateLimited");
+          setCooldown(60);
+        }
+      } else {
+        setErrorKey("profile.academic.sendFailed");
+      }
     } finally {
       setBusy(false);
     }

@@ -88,6 +88,20 @@ pnpm icons                 # regenerate PWA PNG icons
   are rounded to two decimals and exact addresses are never collected.
 - 2026-11-11 — M1 Worker and Playwright tests are deferred at the user's request. Do not add the test
   scaffold or fixed-OTP test config until the user asks for it.
+- 2026-11-13 — Staging deploys run only after the CI workflow succeeds on the exact commit
+  (`workflow_run` gate in `deploy-staging.yml`); manual `workflow_dispatch` bypasses it by design.
+- 2026-11-13 — Academic-email sends are rate limited per user: 60-second resend cooldown plus at most
+  5 codes per hour (429 `rate_limited`/`hourly_limit` with `retry-after`). Migration 0002 adds a
+  partial unique index so only one unconsumed challenge can exist per user.
+- 2026-11-13 — Web calls to `/api/v1/me*` use raw `fetch` plus shared Zod parsing
+  (`apps/web/src/lib/me.ts`); the typed Hono RPC client stays for health checks. Do not migrate the
+  photo/export endpoints to the RPC client (multipart and file downloads do not fit it).
+- 2026-11-13 — The visual system is replaced by the DESIGN.md/Stitch spec, canonically recorded in
+  `docs/design/DESIGN.md`. It is dark-only OLED (`#131315` ground) — the system/light/dark tri-state
+  and the `#C8553D`/`#B44530` light-mode terracotta are retired — and typography is Inter-only
+  (Source Serif 4 retired). Where the original DESIGN.md prose and YAML tokens conflicted, the YAML
+  tokens win (they match the Stitch screens). Restyle scope: existing M1 screens only. This
+  supersedes the 2026-11-09 theme, typeface, and terracotta decisions.
 
 ## Assumptions
 

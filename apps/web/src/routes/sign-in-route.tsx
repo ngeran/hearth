@@ -21,7 +21,17 @@ type AuthErrorKey =
   | "auth.errors.passkeyFailed";
 
 function safeRedirectTarget(value: unknown): string | null {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("/sign-in")
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  // Browsers treat "\" as "/" in special-scheme URLs, so normalize before
+  // rejecting protocol-relative targets like "//host" or "/\host".
+  const normalized = value.replace(/\\/g, "/");
+
+  return normalized.startsWith("/") &&
+    !normalized.startsWith("//") &&
+    !normalized.startsWith("/sign-in")
     ? value
     : null;
 }

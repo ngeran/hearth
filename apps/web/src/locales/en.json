@@ -198,6 +198,7 @@
       "invalidEmail": "Enter a valid email address.",
       "sendFailed": "We could not send the code.",
       "rateLimited": "Wait a moment before requesting another code.",
+      "hourlyLimited": "We can't send more codes this hour. Try again later.",
       "invalidCode": "That code is not correct or has expired.",
       "generic": "Something went wrong. Please try again."
     },

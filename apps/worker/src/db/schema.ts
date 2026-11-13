@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const timestamp = (name: string) => integer(name, { mode: "timestamp" });
@@ -167,6 +168,10 @@ export const academicVerifications = sqliteTable(
   (table) => [
     index("idx_academic_verifications_user_id").on(table.userId),
     index("idx_academic_verifications_user_consumed").on(table.userId, table.consumedAt),
+    // At most one active (unconsumed) challenge per user; mirrors migration 0002.
+    uniqueIndex("idx_academic_verifications_active")
+      .on(table.userId)
+      .where(sql`consumed_at IS NULL`),
   ],
 );
 
