@@ -1,0 +1,142 @@
+@import "tailwindcss";
+@import "@fontsource-variable/source-serif-4";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --hearth-background: #faf7f2;
+  --hearth-surface: #ffffff;
+  --hearth-foreground: #1f2933;
+  --hearth-card: #ffffff;
+  --hearth-card-foreground: #1f2933;
+  --hearth-popover: #ffffff;
+  --hearth-popover-foreground: #1f2933;
+  --hearth-primary: #c8553d;
+  --hearth-primary-strong: #b44530;
+  --hearth-primary-foreground: #ffffff;
+  --hearth-secondary: #6b8f71;
+  --hearth-secondary-strong: #55755a;
+  --hearth-secondary-foreground: #ffffff;
+  --hearth-accent: #e8a33d;
+  --hearth-accent-foreground: #1f2933;
+  --hearth-muted: #efe9df;
+  --hearth-muted-foreground: #5f6b76;
+  --hearth-border: #e3d9cc;
+  --hearth-input: #d7cbbd;
+  --hearth-ring: #a93e29;
+  --hearth-destructive: #a12c2c;
+  --hearth-destructive-foreground: #ffffff;
+  --hearth-radius: 1.25rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --hearth-background: #14191d;
+  --hearth-surface: #1c2329;
+  --hearth-foreground: #f5efe7;
+  --hearth-card: #1c2329;
+  --hearth-card-foreground: #f5efe7;
+  --hearth-popover: #1c2329;
+  --hearth-popover-foreground: #f5efe7;
+  --hearth-primary: #c8553d;
+  --hearth-primary-strong: #e07a63;
+  --hearth-primary-foreground: #14191d;
+  --hearth-secondary: #6b8f71;
+  --hearth-secondary-strong: #8fb697;
+  --hearth-secondary-foreground: #14191d;
+  --hearth-accent: #f0b35a;
+  --hearth-accent-foreground: #14191d;
+  --hearth-muted: #252e35;
+  --hearth-muted-foreground: #b3bdc6;
+  --hearth-border: #39454e;
+  --hearth-input: #46535d;
+  --hearth-ring: #f0b35a;
+  --hearth-destructive: #e07a63;
+  --hearth-destructive-foreground: #14191d;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
+
+  --color-background: var(--hearth-background);
+  --color-foreground: var(--hearth-foreground);
+  --color-surface: var(--hearth-surface);
+  --color-card: var(--hearth-card);
+  --color-card-foreground: var(--hearth-card-foreground);
+  --color-popover: var(--hearth-popover);
+  --color-popover-foreground: var(--hearth-popover-foreground);
+  --color-primary: var(--hearth-primary-strong);
+  --color-primary-brand: var(--hearth-primary);
+  --color-primary-foreground: var(--hearth-primary-foreground);
+  --color-secondary: var(--hearth-secondary-strong);
+  --color-secondary-brand: var(--hearth-secondary);
+  --color-secondary-foreground: var(--hearth-secondary-foreground);
+  --color-accent: var(--hearth-accent);
+  --color-accent-foreground: var(--hearth-accent-foreground);
+  --color-muted: var(--hearth-muted);
+  --color-muted-foreground: var(--hearth-muted-foreground);
+  --color-border: var(--hearth-border);
+  --color-input: var(--hearth-input);
+  --color-ring: var(--hearth-ring);
+  --color-destructive: var(--hearth-destructive);
+  --color-destructive-foreground: var(--hearth-destructive-foreground);
+
+  --radius-card: var(--hearth-radius);
+  --radius-control: 0.875rem;
+  --shadow-soft: 0 24px 64px -32px rgb(31 41 51 / 0.28);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+    background: var(--color-background);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100dvh;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

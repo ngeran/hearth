@@ -1,0 +1,291 @@
+{
+  "meta": {
+    "title": "Hearth — a calmer way to find a housemate",
+    "description": "Hearth helps students and first-time movers find someone they enjoy living with, with plain-language matches and privacy by default."
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Hearth home",
+    "matches": "Matches",
+    "messages": "Messages",
+    "profile": "Profile",
+    "signIn": "Sign in",
+    "account": "Your account"
+  },
+  "header": {
+    "language": "Language",
+    "languageOption": {
+      "en": "English",
+      "el": "Greek"
+    },
+    "theme": "Theme",
+    "themeMode": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "themeAction": "Switch theme: {{mode}}"
+  },
+  "common": {
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We could not load this page. Please try again.",
+    "retry": "Try again",
+    "back": "Back",
+    "continue": "Continue",
+    "saving": "Saving…"
+  },
+  "validation": {
+    "checkField": "Check this field.",
+    "choose": "Choose…"
+  },
+  "auth": {
+    "title": "Sign in to Hearth",
+    "body": "We will email you a six-digit code. No password needed.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send me a code",
+    "sending": "Sending…",
+    "codeTitle": "Check your email",
+    "codeBody": "We sent a six-digit code to {{email}}.",
+    "codeLabel": "Sign-in code",
+    "codeHint": "The code expires in 10 minutes.",
+    "codePlaceholder": "000000",
+    "verify": "Sign in",
+    "verifying": "Checking…",
+    "changeEmail": "Change email",
+    "resend": "Send a new code",
+    "resendIn": "New code in {{seconds}}s",
+    "or": "or",
+    "passkeyAction": "Sign in with a passkey",
+    "passkeyBody": "Use your device's fingerprint, face or PIN.",
+    "signedInRedirecting": "Signing you in…",
+    "errors": {
+      "invalidEmail": "Enter a valid email address.",
+      "rateLimited": "Too many attempts. Wait a moment and try again.",
+      "sendFailed": "We could not send the code. Please try again.",
+      "generic": "Something went wrong. Please try again.",
+      "invalidCode": "That code is not correct or has expired.",
+      "passkeyFailed": "The passkey sign-in did not finish. Try the email code instead."
+    }
+  },
+  "onboarding": {
+    "title": "Let's set up your profile",
+    "eyebrow": "Welcome",
+    "progress": "Step {{current}} of {{total}}",
+    "ageConfirm": "I am 18 or older.",
+    "ageHint": "Hearth is for adults only.",
+    "photoRequired": "Add a profile photo to continue.",
+    "saveFailed": "We could not save this step. Please try again.",
+    "incomplete": "A few details are still missing. Check your answers.",
+    "finish": "Finish",
+    "review": {
+      "title": "One last look"
+    },
+    "steps": {
+      "about": {
+        "title": "What should we call you?",
+        "body": "Your name and a photo help people recognise you."
+      },
+      "location": {
+        "title": "Where are you looking?",
+        "body": "We show an approximate area only, never an exact address."
+      },
+      "timing": {
+        "title": "When, and at what budget?",
+        "body": "Tell us your move-in window and the range that works for you."
+      },
+      "living": {
+        "title": "How do you want to live?",
+        "body": "A few words about you and what you are looking for."
+      },
+      "finish": {
+        "title": "All set?",
+        "body": "Review your choices and pick the app language."
+      }
+    }
+  },
+  "profile": {
+    "title": "Your profile",
+    "body": "Keep your details current. You decide what is visible.",
+    "incompleteBanner": "Your profile is not complete yet.",
+    "finishOnboarding": "Finish your profile",
+    "detailsTitle": "Profile details",
+    "saved": "Your changes were saved.",
+    "saveFailed": "We could not save your changes.",
+    "save": "Save changes",
+    "signOut": "Sign out",
+    "photo": {
+      "sectionTitle": "Photo",
+      "label": "Profile photo",
+      "alt": "Your profile photo",
+      "choose": "Choose a photo",
+      "change": "Change photo",
+      "remove": "Remove",
+      "hint": "JPEG or PNG, up to 5 MB. Location data is removed automatically.",
+      "uploading": "Uploading your photo…",
+      "invalidType": "Use a JPEG or PNG image.",
+      "tooLarge": "The image must be 5 MB or smaller.",
+      "uploadFailed": "We could not upload the photo.",
+      "removeFailed": "We could not remove the photo."
+    },
+    "displayName": {
+      "label": "Display name",
+      "hint": "Between {{min}} and {{max}} characters."
+    },
+    "areaLabel": {
+      "label": "Area",
+      "hint": "For example Koukaki, Athens. No exact address."
+    },
+    "campus": {
+      "label": "University",
+      "hint": "Optional. It helps us suggest nearby areas.",
+      "none": "None",
+      "loadFailed": "We could not load the university list."
+    },
+    "lifeStage": {
+      "label": "Life stage",
+      "student": "Student",
+      "first-time-mover": "Moving out for the first time",
+      "independent": "Living independently",
+      "other": "Something else"
+    },
+    "moveIn": {
+      "fromLabel": "Move in from",
+      "toLabel": "Move in by"
+    },
+    "budget": {
+      "label": "Budget",
+      "minLabel": "Minimum (€)",
+      "maxLabel": "Maximum (€)",
+      "hint": "Monthly rent in euro."
+    },
+    "seeking": {
+      "label": "Looking for",
+      "hint": "A room, a roommate, or both.",
+      "room": "A room",
+      "roommate": "A roommate",
+      "either": "Either"
+    },
+    "bio": {
+      "label": "A few words about you",
+      "hint": "Between {{min}} and {{max}} characters.",
+      "count": "{{count}} / {{max}} characters"
+    },
+    "language": {
+      "label": "App language",
+      "hint": "The language Hearth uses for you."
+    },
+    "academic": {
+      "title": "Student email",
+      "body": "Verify your university email for a small badge. Optional.",
+      "verified": "Verified: {{email}}",
+      "notVerified": "Not verified yet.",
+      "emailLabel": "Student email",
+      "emailPlaceholder": "you@university.gr",
+      "send": "Send a code",
+      "sending": "Sending…",
+      "codeSent": "We sent a code to {{email}}.",
+      "codeLabel": "Verification code",
+      "verify": "Verify",
+      "verifying": "Checking…",
+      "resend": "Send a new code",
+      "resendIn": "New code in {{seconds}}s",
+      "changeEmail": "Change email",
+      "invalidEmail": "Enter a valid email address.",
+      "sendFailed": "We could not send the code.",
+      "rateLimited": "Wait a moment before requesting another code.",
+      "invalidCode": "That code is not correct or has expired.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "passkeys": {
+      "title": "Passkeys",
+      "body": "Sign in without a code, using your fingerprint or face.",
+      "unsupported": "This device or browser does not support passkeys.",
+      "defaultName": "Passkey",
+      "remove": "Remove",
+      "empty": "You have not added a passkey yet.",
+      "nameLabel": "Passkey name",
+      "namePlaceholder": "For example My phone",
+      "add": "Add a passkey",
+      "addFailed": "We could not add the passkey.",
+      "deleteFailed": "We could not remove the passkey."
+    },
+    "data": {
+      "title": "Your data",
+      "body": "Download a copy of your data or delete your account.",
+      "export": "Download my data",
+      "exported": "Your copy was downloaded.",
+      "exportFailed": "We could not download your data.",
+      "deleteFailed": "We could not delete your account."
+    },
+    "delete": {
+      "title": "Delete account",
+      "body": "This permanently deletes your profile, photo, sessions and passkeys. It cannot be undone.",
+      "confirmLabel": "Type DELETE to confirm",
+      "confirmHint": "This action is permanent.",
+      "action": "Delete my account",
+      "deleting": "Deleting…"
+    }
+  },
+  "home": {
+    "eyebrow": "For students and first-time movers",
+    "title": "A calmer way to find a housemate.",
+    "body": "We match you on how you live, explain every match in plain words, and never sell your data.",
+    "values": {
+      "label": "What matters here",
+      "compatibilityTitle": "How you live comes first",
+      "compatibilityBody": "Rent, area and dates are filters. The real question is whether daily life fits.",
+      "clarityTitle": "Every match explained",
+      "clarityBody": "No mystery score. You see the overlaps and the things worth talking about.",
+      "privacyTitle": "Private by default",
+      "privacyBody": "We collect the minimum, show approximate areas, and keep safety features free."
+    }
+  },
+  "status": {
+    "title": "Service status",
+    "loading": "Checking the connection…",
+    "ok": "Connected",
+    "okDescription": "The app and API are running.",
+    "error": "We can't reach Hearth right now.",
+    "retry": "Check again",
+    "lastChecked": "Checked at {{time}}"
+  },
+  "placeholder": {
+    "matches": {
+      "title": "Matches",
+      "body": "Your first matches will appear here after you finish the Vibe Cards. Until then, the space is yours."
+    },
+    "messages": {
+      "title": "Messages",
+      "body": "When you and someone both agree to talk, your conversation will live here."
+    },
+    "profile": {
+      "title": "Profile",
+      "body": "Tell Hearth how you live and what matters to you. You stay in control of what is visible."
+    }
+  },
+  "offline": {
+    "title": "You're offline",
+    "body": "Hearth will pick up where you left off. Check your connection and try again.",
+    "retry": "Try again"
+  },
+  "pwa": {
+    "updateTitle": "A new version is ready",
+    "updateBody": "Refresh when it suits you. Nothing will be lost.",
+    "updateAction": "Refresh",
+    "offlineReady": "Hearth is ready to work offline.",
+    "dismiss": "Dismiss"
+  },
+  "notFound": {
+    "title": "We couldn't find that page",
+    "body": "The link may be old, or the page may have moved.",
+    "action": "Go home"
+  },
+  "footer": {
+    "copyright": "Hearth · {{year}}"
+  }
+}

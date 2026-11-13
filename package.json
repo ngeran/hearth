@@ -1,0 +1,39 @@
+{
+  "name": "hearth",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm build:web && concurrently --kill-others --names api,web --prefix-colors blue,green \"pnpm dev:api\" \"pnpm --filter @hearth/web dev\"",
+    "dev:api": "wrangler dev --config wrangler.jsonc --port 8787",
+    "dev:web": "pnpm --filter @hearth/web dev",
+    "build": "pnpm build:web && pnpm build:worker",
+    "build:web": "pnpm --filter @hearth/web build",
+    "build:worker": "wrangler deploy --config wrangler.jsonc --dry-run --outdir apps/worker/dist",
+    "preview": "wrangler dev --config wrangler.jsonc --port 8787",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "pnpm --filter @hearth/shared test && pnpm --filter @hearth/worker test",
+    "test:e2e": "pnpm build:web && playwright test",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "sim": "node scripts/sim.mjs",
+    "icons": "node scripts/generate-icons.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply hearth-db --local --config wrangler.jsonc",
+    "db:migrate:staging": "wrangler d1 migrations apply hearth-db-staging --remote --env staging --config wrangler.jsonc",
+    "deploy:staging": "wrangler deploy --env staging --config wrangler.jsonc",
+    "clean": "rm -rf apps/web/dist apps/worker/dist .wrangler"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "@playwright/test": "1.65.0",
+    "concurrently": "10.0.7",
+    "drizzle-kit": "0.31.11",
+    "typescript": "6.0.3",
+    "wrangler": "4.159.0"
+  }
+}

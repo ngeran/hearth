@@ -1,0 +1,124 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hearth",
+  "main": "apps/worker/src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./apps/web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    // Better Auth trusted origin and the same-origin write guard. Local dev uses
+    // the Vite origin; production must match the deployed Worker origin.
+    "APP_ORIGIN": "http://localhost:5173"
+  },
+  "d1_databases": [
+    {
+      // Placeholder until `wrangler d1 create hearth-db` returns the real UUID.
+      "binding": "DB",
+      "database_name": "hearth-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "hearth-photos"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHAT",
+        "class_name": "ChatRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ChatRoom"]
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "JOBS",
+        "queue": "hearth-jobs"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "hearth-jobs"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["0 9 * * 1"]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "env": {
+    "staging": {
+      "name": "hearth-staging",
+      "vars": {
+        // Replace with the real workers.dev or custom-domain origin after the
+        // first `pnpm deploy:staging`.
+        "APP_ORIGIN": "https://hearth-staging.example.workers.dev"
+      },
+      "d1_databases": [
+        {
+          // Placeholder until `wrangler d1 create hearth-db-staging` returns the real UUID.
+          "binding": "DB",
+          "database_name": "hearth-db-staging",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "PHOTOS",
+          "bucket_name": "hearth-photos-staging"
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "CHAT",
+            "class_name": "ChatRoom"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_sqlite_classes": ["ChatRoom"]
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "JOBS",
+            "queue": "hearth-jobs-staging"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "hearth-jobs-staging"
+          }
+        ]
+      },
+      "triggers": {
+        "crons": ["0 9 * * 1"]
+      },
+      "observability": {
+        "enabled": true
+      }
+    }
+  }
+}

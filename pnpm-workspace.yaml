@@ -1,0 +1,41 @@
+packages:
+  - apps/*
+  - packages/*
+
+minimumReleaseAgeExclude:
+  - "@cloudflare/workers-types@5.20261110.1"
+  - "@rolldown/binding-android-arm-eabi@1.2.18"
+  - "@rolldown/binding-android-arm64@1.2.18"
+  - "@rolldown/binding-darwin-arm64@1.2.18"
+  - "@rolldown/binding-darwin-x64@1.2.18"
+  - "@rolldown/binding-freebsd-x64@1.2.18"
+  - "@rolldown/binding-linux-arm-gnueabihf@1.2.18"
+  - "@rolldown/binding-linux-arm64-gnu@1.2.18"
+  - "@rolldown/binding-linux-arm64-musl@1.2.18"
+  - "@rolldown/binding-linux-ppc64-gnu@1.2.18"
+  - "@rolldown/binding-linux-s390x-gnu@1.2.18"
+  - "@rolldown/binding-linux-x64-gnu@1.2.18"
+  - "@rolldown/binding-linux-x64-musl@1.2.18"
+  - "@rolldown/binding-openharmony-arm64@1.2.18"
+  - "@rolldown/binding-win32-arm64-msvc@1.2.18"
+  - "@rolldown/binding-win32-x64-msvc@1.2.18"
+  - "@vitejs/plugin-react@6.3.0"
+  - i18next@27.1.0
+  - miniflare@5.20261109.0-beta
+  - rolldown@1.2.18
+  - vite@8.3.7
+  - wrangler@4.159.0
+  - "@cloudflare/vitest-plugin@1.6.1"
+  - "@better-auth/core@1.7.20"
+  - "@better-auth/drizzle-adapter@1.7.20"
+  - "@better-auth/kysely-adapter@1.7.20"
+  - "@better-auth/memory-adapter@1.7.20"
+  - "@better-auth/mongo-adapter@1.7.20"
+  - "@better-auth/passkey@1.7.20"
+  - "@better-auth/prisma-adapter@1.7.20"
+  - "@better-auth/telemetry@1.7.20"
+  - better-auth@1.7.20
+
+allowBuilds:
+  esbuild: true
+  workerd: true

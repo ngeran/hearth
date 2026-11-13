@@ -1,0 +1,19 @@
+# Copy to .dev.vars for local Wrangler development.
+# Never commit real values. Set deployed values with `wrangler secret put`.
+# APP_ORIGIN is non-secret and lives in wrangler.jsonc.
+
+# At least 32 characters. Generate with: openssl rand -base64 32
+BETTER_AUTH_SECRET=replace-with-a-random-string-of-32-or-more-characters
+
+# Optional. Defaults to APP_ORIGIN; set only when they differ.
+# BETTER_AUTH_URL=http://localhost:5173
+
+# Resend HTTP API. Required outside the test environment.
+RESEND_API_KEY=re_replace_me
+MAIL_FROM=Hearth <hello@your-domain.example>
+
+# development | test. Never set "test" on a deployed Worker.
+ENVIRONMENT=development
+
+# Test-only fixed OTP (six digits). Keep unset everywhere else.
+# AUTH_TEST_OTP=123456
