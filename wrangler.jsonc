@@ -4,6 +4,9 @@
   "main": "apps/worker/src/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Pin every local wrangler command to the Hearth Cloudflare account
+  // (ngeran@gmail.com) so a wrong dashboard/login can never target it.
+  "account_id": "ef33c6140605cc4ba922ad3320c0be88",
   "assets": {
     "directory": "./apps/web/dist",
     "binding": "ASSETS",
@@ -19,7 +22,7 @@
     {
       "binding": "DB",
       "database_name": "hearth-db",
-      "database_id": "a44819e3-1493-45bc-b9f5-62e9bf7a21ba",
+      "database_id": "bb492645-051e-418d-926f-12a6f04556d1",
       "migrations_dir": "migrations"
     }
   ],
@@ -74,7 +77,7 @@
         {
           "binding": "DB",
           "database_name": "hearth-db-staging",
-          "database_id": "f52e8350-21ad-469e-96d7-bdb8591d241f",
+          "database_id": "59b8a11d-630d-4e29-8804-30b3268cbb69",
           "migrations_dir": "migrations"
         }
       ],

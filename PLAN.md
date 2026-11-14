@@ -169,12 +169,16 @@ moving on. Gate = `pnpm typecheck && pnpm lint && pnpm build && pnpm check:i18n 
 11. [x] **Remaining surfaces sweep** — home, not-found, placeholders, loading/error, offline,
     update-prompt, health-card, photo-field: token/serif leftovers, ambient glows. Verify:
     gate.
-12. **Final** — full gate one more time plus `pnpm test:e2e` locally (e2e smoke incl. 360px
+12. [x] **Final** — full gate one more time plus `pnpm test:e2e` locally (e2e smoke incl. 360px
     overflow + language tests); push branch and confirm CI green; run the `reviewer` subagent
     on the full diff before committing. Verify: e2e + CI green + review findings addressed.
     Status 2026-11-13: gate green, e2e 8/8 local, reviewer clean (2 major + 3 nits fixed),
-    committed `deb85dd` on `main`. **Blocked: push/CI** — repo has no git remote and `gh` is
-    not installed on this NixOS machine. Re-run CI check after a remote exists.
+    committed `deb85dd` on `main`.
+    Status 2026-11-14: remote `origin` (github.com/ngeran/hearth) exists; `main` at `535b030`
+    already pushed; gate re-run green at HEAD; CI green on `535b030` (run 43589358990).
+    `Deploy staging` fails at "Apply staging D1 migrations" — the two GitHub secrets were
+    missing at the time (since resolved by the 2026-11-14 move to the ngeran account;
+    secrets still to be added), outside this plan's scope.
 
 ### NixOS e2e note (Playwright browser libs)
 

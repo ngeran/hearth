@@ -67,11 +67,13 @@ pnpm icons                 # regenerate PWA PNG icons
   light mode because white text on `#C8553D` is 4.35:1, below WCAG AA for normal text.
 - 2026-11-09 — Headings use Source Serif 4 and body text uses Inter, both self-hosted via Fontsource and
   both include Greek subsets. No third-party font requests.
-- 2026-11-14 — D1 databases (`hearth-db` a44819e3-1493-45bc-b9f5-62e9bf7a21ba,
-  `hearth-db-staging` f52e8350-21ad-469e-96d7-bdb8591d241f) and Queues (`hearth-jobs`,
-  `hearth-jobs-staging`) exist; real IDs are in `wrangler.jsonc`. R2 buckets are pending
-  one-time R2 enablement in the Cloudflare dashboard, so deploys fail until the two
-  `hearth-photos*` buckets are created.
+- 2026-11-14 — All Cloudflare resources live on the `ngeran@gmail.com` account
+  (`ef33c6140605cc4ba922ad3320c0be88`), pinned via `account_id` in `wrangler.jsonc` so local
+  wrangler commands can never hit another account (the dev machine has multiple Cloudflare
+  logins; earlier resources created on `calgreece@gmail.com` are abandoned/stray). D1
+  databases (`hearth-db` bb492645-051e-418d-926f-12a6f04556d1, `hearth-db-staging`
+  59b8a11d-630d-4e29-8804-30b3268cbb69), Queues (`hearth-jobs`, `hearth-jobs-staging`) and R2
+  buckets (`hearth-photos`, `hearth-photos-staging`) all exist; real IDs are in `wrangler.jsonc`.
 - 2026-11-09 — Worker unit tests use a minimal `wrangler.test.jsonc` without static assets. The full
   production config is exercised by `pnpm build` and Playwright.
 - 2026-11-09 — `pnpm sim` currently validates seeded archetype generation only. The real deterministic
@@ -108,10 +110,11 @@ pnpm icons                 # regenerate PWA PNG icons
 
 ## Assumptions
 
-- Cloudflare D1 + Queues exist (2026-11-14) but R2 is not yet enabled on the account, so no deploy
-  has run. Remaining setup: enable R2 and create the two `hearth-photos*` buckets; add the two
-  documented GitHub secrets; after the first staging deploy, replace the staging origin placeholder
-  in `wrangler.jsonc` and set the three Worker runtime secrets.
+- Cloudflare D1, Queues and R2 all exist (2026-11-14) on the pinned `ngeran@gmail.com` account,
+  so infra is deploy-ready. Remaining setup: add the two documented GitHub secrets (token must be
+  created on the ngeran account); after the first staging deploy, replace the staging origin
+  placeholder in `wrangler.jsonc` and set the three Worker runtime secrets. Optionally delete the
+  stray `hearth-*` resources on the calgreece account.
 - The repository is new and has no pre-existing conventions to preserve.
 - `APP_ORIGIN` is non-secret configuration in `wrangler.jsonc`; the rest of the listed values are secrets.
 - The primary development environment is NixOS on x86_64 (migrated from Termux on 2026-11-13) and the app
