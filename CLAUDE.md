@@ -112,8 +112,9 @@ pnpm icons                 # regenerate PWA PNG icons
 
 - Cloudflare D1, Queues and R2 all exist (2026-11-14) on the pinned `ngeran@gmail.com` account,
   and the staging Worker is deployed at https://hearth-staging.ngeran.workers.dev (GitHub
-  secrets set; `APP_ORIGIN` wired; `BETTER_AUTH_SECRET` set). Remaining: set `RESEND_API_KEY`
-  and `MAIL_FROM` on staging when email sending is needed. Optionally delete the stray
+  secrets set; `APP_ORIGIN` wired). Email sending is live: `BETTER_AUTH_SECRET`,
+  `RESEND_API_KEY` and `MAIL_FROM` (`Hearth <noreply@ngeran.com>`) are set on staging, and the
+  `ngeran.com` domain is verified in Resend (DKIM + SPF). Optionally delete the stray
   `hearth-*` resources on the calgreece account.
 - The repository is new and has no pre-existing conventions to preserve.
 - `APP_ORIGIN` is non-secret configuration in `wrangler.jsonc`; the rest of the listed values are secrets.
