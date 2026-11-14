@@ -67,8 +67,11 @@ pnpm icons                 # regenerate PWA PNG icons
   light mode because white text on `#C8553D` is 4.35:1, below WCAG AA for normal text.
 - 2026-11-09 — Headings use Source Serif 4 and body text uses Inter, both self-hosted via Fontsource and
   both include Greek subsets. No third-party font requests.
-- 2026-11-09 — D1 bindings are stubs until resources are created; replace the zero UUIDs in
-  `wrangler.jsonc` with real production/staging IDs before deploying.
+- 2026-11-14 — D1 databases (`hearth-db` a44819e3-1493-45bc-b9f5-62e9bf7a21ba,
+  `hearth-db-staging` f52e8350-21ad-469e-96d7-bdb8591d241f) and Queues (`hearth-jobs`,
+  `hearth-jobs-staging`) exist; real IDs are in `wrangler.jsonc`. R2 buckets are pending
+  one-time R2 enablement in the Cloudflare dashboard, so deploys fail until the two
+  `hearth-photos*` buckets are created.
 - 2026-11-09 — Worker unit tests use a minimal `wrangler.test.jsonc` without static assets. The full
   production config is exercised by `pnpm build` and Playwright.
 - 2026-11-09 — `pnpm sim` currently validates seeded archetype generation only. The real deterministic
@@ -105,9 +108,10 @@ pnpm icons                 # regenerate PWA PNG icons
 
 ## Assumptions
 
-- No Cloudflare account resources exist yet, so all resource IDs are placeholders and no deploy is run in
-  M1. CI is configured but the staging deploy needs the two documented GitHub secrets. Create the D1, R2
-  and Queue resources as described in `README.md`, then replace the zero UUIDs and the staging origin.
+- Cloudflare D1 + Queues exist (2026-11-14) but R2 is not yet enabled on the account, so no deploy
+  has run. Remaining setup: enable R2 and create the two `hearth-photos*` buckets; add the two
+  documented GitHub secrets; after the first staging deploy, replace the staging origin placeholder
+  in `wrangler.jsonc` and set the three Worker runtime secrets.
 - The repository is new and has no pre-existing conventions to preserve.
 - `APP_ORIGIN` is non-secret configuration in `wrangler.jsonc`; the rest of the listed values are secrets.
 - The primary development environment is NixOS on x86_64 (migrated from Termux on 2026-11-13) and the app

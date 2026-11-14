@@ -17,10 +17,9 @@
   },
   "d1_databases": [
     {
-      // Placeholder until `wrangler d1 create hearth-db` returns the real UUID.
       "binding": "DB",
       "database_name": "hearth-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "a44819e3-1493-45bc-b9f5-62e9bf7a21ba",
       "migrations_dir": "migrations"
     }
   ],
@@ -73,10 +72,9 @@
       },
       "d1_databases": [
         {
-          // Placeholder until `wrangler d1 create hearth-db-staging` returns the real UUID.
           "binding": "DB",
           "database_name": "hearth-db-staging",
-          "database_id": "00000000-0000-0000-0000-000000000000",
+          "database_id": "f52e8350-21ad-469e-96d7-bdb8591d241f",
           "migrations_dir": "migrations"
         }
       ],
