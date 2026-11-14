@@ -1,83 +1,93 @@
-# PLAN — M2 lifestyle questionnaire
+# PLAN — M3 matching engine, matches UI, compatibility report
 
-Spec: `docs/specs/M2.md` (owner-approved 2026-11-14 — questionnaire wording, archetype names, all
-design decisions). The spec is canonical for content and product behavior; this file is the build
-checklist. The restyle plan that lived here previously is complete (12/12, shipped in `deb85dd`).
+Spec: `docs/specs/M3.md` (owner review of tiers/tags/copy pending — build starts only after
+approval). The spec is canonical for content and product behavior; this file is the build
+checklist. The M2 plan that lived here previously is complete (9/9, shipped in `30e6998`).
 
 ## Constraints
 
-- Storage is one nullable `lifestyle_json` TEXT column on `profiles` (versioned envelope, shared
-  Zod validation on write and read). No per-question columns, no new tables, no new endpoints.
-- The questionnaire is required for onboarding completeness; the all-or-nothing patch carries the
-  full envelope `{ version: 1, answers: { … } }`.
-- The archetype is derived on read in `packages/shared`, never persisted.
-- All user-facing strings (questions, options, dimensions, archetypes, step/section copy) live in
-  `apps/web/src/locales/en.json` + `el.json`, keyed by the code question ids; parity via
-  `pnpm check:i18n`. Greek is the owner-approved wording from the spec.
-- No protected-characteristic questions, no judgmental option wording, no free text.
-- Visual system: existing dark-only tokens/utilities from the restyle; no new hex in components.
-- Existing migrations are immutable; M2 adds `migrations/0003_lifestyle.sql`.
-- M1-deferred Worker/Playwright tests stay deferred; M2 adds shared unit tests only. The existing
-  e2e smoke suite must stay green (it does not drive onboarding).
+- Scoring is pure shared code over the M2 lifestyle envelope: every question weighs 10%,
+  `score = round(mean weight × 100)`, tiers at 75/50. No stored per-pair state, no batch job.
+- Eligibility gates (seeking, budget, move-in window, area ±0.05 or same campus) filter who
+  appears; they never change the score; missing data passes a gate.
+- One new endpoint `GET /api/v1/matches` (session-authed, compute-on-read, limit 20, shared error
+  envelope, 403 for incomplete callers). No query params, no new error codes, no logging of match
+  data.
+- Matches payload includes the other member's lifestyle answer levels (dimension-level report +
+  habit tags only in the UI); `profile.lifestyle.body` copy is updated to say who sees it.
+- No photos of other members in M3 — initials avatars; public photo endpoint is an M4 decision.
+- All new strings in `apps/web/src/locales/en.json` + `el.json` at exact parity (Greek from the
+  approved spec tables); report rows reuse the existing `lifestyle.questions.*.options.*` labels.
+- Seeds: `scripts/seed-matches.mjs` (deterministic, staging-only, `seed_` ids +
+  `@seed.hearth.test`, cascade cleanup) and the `pnpm seed:matches` script entry — no new
+  dependencies.
+- Visual system: existing dark-only tokens/utilities; no new hex in components.
+- No migrations (all data exists after M2).
+- Worker endpoint tests stay deferred (M1 decision); shared unit tests cover scoring/gates/tags;
+  existing e2e smoke must stay green.
 - Local gate (NixOS x86_64): `pnpm typecheck && pnpm lint && pnpm build && pnpm check:i18n &&
   pnpm test`. `pnpm` is not on PATH: `corepack enable --install-directory /tmp/opencode/bin &&
   export PATH="/tmp/opencode/bin:$PATH"`.
 
 ## Conventions (from existing code — do not invent new ones)
 
-- Strict TypeScript, no `any`, no unjustified non-null assertions; Zod `.strict()` objects; unix
-  seconds for instants (no new timestamps in M2 — `profiles.updated_at` already bumps).
+- Strict TypeScript, no `any`, no unjustified non-null assertions; Zod `.strict()` objects.
 - Shared package stays pure (no DOM/Worker APIs); every schema edge gets a unit test; export new
-  modules from `packages/shared/src/index.ts`.
-- Worker: validate every input with the shared schema, parameterized queries only, shared error
-  envelope, never log personal data.
-- Web: `react-hook-form` + shared Zod schemas; radio groups use `fieldset`/`legend` +
-  `aria-describedby`; empty/loading/error states; 360 px; focus management like existing steps.
+  modules from `packages/shared/src/index.ts` (alphabetical order).
+- Worker: route modules follow `me.ts`/`campuses.ts` (`new Hono<AppEnv>()`, `use("*",
+  requireSession)`, export the sub-app, mount with `.route()`); validate outputs with shared
+  schemas; parameterized queries only; never log personal data.
+- Web: raw `fetch` + shared Zod parse in `lib/*.ts` (the `me.ts` pattern — the RPC client stays for
+  health only); TanStack Query hooks in `use-*.ts` (`retry: false`); empty/loading/error states;
+  `aria-*` wiring; 360 px; focus management like existing screens.
 - Biome formatting enforced (`pnpm lint`); status lines below use 4-space continuation indents.
 
 ## Checklist
 
 Run the local gate after every step; tick only when it passes. Fix failures before moving on.
 
-1. [x] **Shared lifestyle module** — `packages/shared/src/lifestyle.ts`:
-   `LIFESTYLE_VERSION`, `LIFESTYLE_DIMENSIONS`, `LIFESTYLE_QUESTIONS` (10 ids + dimension +
-   order), `LIFESTYLE_QUESTION_IDS`, level type, `lifestyleEnvelopeSchema` (strict: version
-   literal, all 10 ids at levels 0|1|2, no extras), `parseStoredLifestyle` (defensive read:
-   null/invalid JSON → null), `deriveLifestyleArchetype` with the exact spec mapping. Unit tests:
-   schema rejects partial/unknown/extra/out-of-range, envelope round-trip, parse helper on bad
-   input, all 5 archetype branches + boundaries (socialScore 1 vs 2, late+social 2 vs 3). Export
-   from the shared index. Verify: `pnpm --filter @hearth/shared test && pnpm --filter
-   @hearth/shared typecheck`.
-2. [x] **Shared profile integration** — `profile.ts`: `lifestyle: LifestyleProfile | null` in
-   `ProfileSnapshot` + snapshot schema, `lifestyle` key in `profilePatchSchema` and
-   `onboardingFormSchema`, `lifestyle` in `ONBOARDING_FIELDS` + `getMissingOnboardingFields`
-   (missing when null). Verify: shared tests cover the completeness boundary (complete profile
-   without lifestyle → missing `lifestyle`) + `pnpm --filter @hearth/shared typecheck`.
-3. [x] **Migration + Drizzle schema** — `apps/worker/src/db/schema.ts` adds `lifestyleJson`
-   nullable text; `migrations/0003_lifestyle.sql` adds the column with a `json_valid` CHECK.
-   Verify with a `node:sqlite` one-off in `/tmp/opencode`: apply 0000→0003, re-apply
-   idempotently, insert a row with invalid JSON → rejected by CHECK, valid envelope → accepted.
-4. [x] **Worker API wiring** — `apps/worker/src/lib/profiles.ts` + `routes/me.ts`: accept the
-   `lifestyle` patch key (all-or-nothing, shared schema), persist the JSON string, parse via
-   `parseStoredLifestyle` on read, surface in `GET /api/v1/me` and the export payload.
-   Verify: `pnpm --filter @hearth/worker typecheck` + full gate (no Worker runtime tests exist —
-   deferred per M1; typecheck + build dry-run is the local proof).
-5. [x] **Locale keys** — questions (label + 3 options), dimension names, archetype names +
-   one-line descriptions + the "why" line, step/section/empty-state copy in `en.json` + `el.json`
-   at exact parity, Greek from the approved spec table. Verify: `pnpm check:i18n`.
-6. [x] **Web components** — `lifestyle-questionnaire.tsx` (5 fieldset/legend dimension groups,
-   3-option radio rows, error wiring, 360 px) + `lifestyle-summary.tsx` ("What we learned about
-   you": 5 dimension lines, archetype name/description, why-line). Verify: `pnpm --filter
-   @hearth/web typecheck`.
-7. [x] **Onboarding integration** — new Lifestyle step between Living and Finish (6 steps,
-   progress bar denominators, STEP_FIELDS for the lifestyle patch, all answered before Continue,
-   review step mentions lifestyle, summary shown after finishing). Verify: full gate.
-8. [x] **Profile integration** — "Your lifestyle" section (summary + change answers + save),
-   empty state, loading/error states. Existing complete profiles re-enter onboarding once via
-   the existing guard — verified by the shared completeness test in step 2. Verify: full gate.
-9. [x] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M2.md` ledger +
-   verification log, full gate + `pnpm test:e2e` (NixOS wrapper below), `reviewer` subagent on
-   the diff, commit. Verify: e2e green locally, reviewer findings addressed, tree committed.
+1. [ ] **Shared match module** — `packages/shared/src/match.ts` + `match.test.ts`: constants
+   (`COMPAT_STRONG_THRESHOLD`, `COMPAT_CHAT_THRESHOLD`, `AREA_MATCH_TOLERANCE`, `MATCHES_LIMIT`),
+   `MatchTier`, `MatchCandidate`, `scoreCompatibility` (score/tier/dimensionScores/shared +
+   friction ids), `matchEligibility` (the 5 gates, null passes), `deriveHabitTags` +
+   `HABIT_TAG_IDS` (max 3, question order), `matchesResponseSchema` (strict). Unit tests: weights,
+   rounding, symmetry, boundaries 74/75 + 49/50, identical → 100, opposite → 0, full gate matrix,
+   tag rules. Export from the shared index. Verify: `pnpm --filter @hearth/shared test &&
+   pnpm --filter @hearth/shared typecheck`.
+2. [ ] **Worker matches route** — `apps/worker/src/routes/matches.ts` (requireSession; 403
+   `forbidden` when the caller's own onboarding is incomplete; SQL prefilter: not-self,
+   `lifestyle_json NOT NULL`, `onboarding_completed_at NOT NULL`, `users.status = 'active'`,
+   `deleted_at IS NULL`; per-candidate `toProfileSnapshot` → JS gates → scoring; sort score desc
+   then displayName asc; limit 20) + `.route("/api/v1/matches", matchesRoutes)` in `index.ts` +
+   fix the stale `scheduled()`/`queue()` comments. Verify: `pnpm --filter @hearth/worker
+   typecheck` + full gate.
+3. [ ] **Seed script** — `scripts/seed-matches.mjs` (`--count` default 12, `--seed` default 42,
+   `--dry-run`; mulberry32; personas covering all 5 archetypes with expected-archetype notes;
+   Athens-cluster areas, one campus cohort, budgets 250–700, windows inside 12 months, seeking
+   weighted roommate/either; generates SQL → `corepack pnpm exec wrangler d1 execute
+   hearth-db-staging --remote --env staging --file`) + `"seed:matches"` script in root
+   `package.json`. Verify: `pnpm seed:matches --dry-run` prints SQL; a `node:sqlite` one-off in
+   `/tmp/opencode` applies it to a fresh 0000→0003 DB and counts 12 users/12 profiles.
+4. [ ] **Web data + locales** — `apps/web/src/lib/matches.ts` (`fetchMatches`, raw fetch +
+   `matchesResponseSchema`) + `use-matches.ts` (`["matches"]`, `retry: false`, `staleTime:
+   60_000`); locale keys at parity: tier names/descriptions, habit tags (`lifestyle.tags.*`),
+   report copy (title, logistics labels, you/them, align/partially/differ sr labels,
+   shared/friction headings), empty state, `profile.lifestyle.body` update. Verify:
+   `pnpm check:i18n && pnpm --filter @hearth/web typecheck`.
+5. [ ] **Matches UI** — `match-card.tsx` (initials avatar, name, area, tier-colored score badge,
+   tags), `compatibility-report.tsx` (score + tier line, Area/Budget/Move-in rows You vs them, 5
+   dimension rows with both option labels + sr-labelled mark, shared/friction chips), new
+   `matches-route.tsx` (empty/loading/error, selection, `lg:` two-pane, mobile overlay panel with
+   close, keyboard + 360 px); `router.tsx`: replace the placeholder with `RequireAuth` +
+   `MatchesRoute`. Verify: full gate.
+6. [ ] **e2e stays green** — run `pnpm test:e2e` (NixOS wrapper below); if any spec asserted the
+   old Matches placeholder copy, update it to the new screen. Verify: e2e green locally.
+7. [ ] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M3.md` ledger +
+   verification log, full gate, `reviewer` subagent on the diff, commit. Verify: reviewer findings
+   addressed, tree committed; owner pushes and CI + Deploy staging go green.
+8. [ ] **Stage the seeds** — after the deploy is green: run `pnpm seed:matches` against staging,
+   verify with a `wrangler d1 execute … --command "SELECT count(*) …"` row count, and have the
+   owner eyeball `/matches`. Verify: seed count correct, owner sees seeded matches.
 
 ### NixOS e2e note (Playwright browser libs)
 
@@ -98,7 +108,7 @@ Env vars do not survive between tool calls — build and run in the same shell i
 
 ## Definition of done
 
-All 9 boxes ticked; gate green; `pnpm check:i18n` parity with the new keys; shared unit tests
-cover every schema edge and all archetype branches; `node:sqlite` migration proof recorded in the
-spec verification log; e2e smoke green; reviewer clean; committed on `main`; the owner pushes and
-CI + Deploy staging go green on the commit.
+All 8 boxes ticked; gate green; `pnpm check:i18n` parity with the new keys; shared unit tests
+cover every scoring edge, gate rule, and tag; seed proof recorded in the spec verification log;
+e2e smoke green; reviewer clean; committed on `main`; the owner pushes, CI + Deploy staging go
+green on the commit, seeds applied, and the owner sees matches on staging.
