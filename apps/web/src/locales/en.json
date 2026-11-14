@@ -30,7 +30,8 @@
     "back": "Back",
     "continue": "Continue",
     "cancel": "Cancel",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "close": "Close"
   },
   "validation": {
     "checkField": "Check this field.",
@@ -179,7 +180,7 @@
     },
     "lifestyle": {
       "title": "Your lifestyle",
-      "body": "How you live at home. Only you can see this for now.",
+      "body": "How you live at home. People you match with see this in your compatibility report.",
       "change": "Change answers",
       "empty": "Answer the ten lifestyle questions to describe how you live.",
       "answer": "Answer the questions"
@@ -390,6 +391,14 @@
         "description": "People and plans are part of your week. Your door — and your kitchen — are usually open."
       }
     },
+    "tags": {
+      "social-host": "Often has people over",
+      "very-tidy": "Tidies as they go",
+      "relaxed-tidy": "Tidies when needed",
+      "home-cook": "Cooks proper meals",
+      "early-bird": "Early bird",
+      "night-owl": "Night owl"
+    },
     "summary": {
       "title": "What we learned about you",
       "changeHint": "You can change any answer later.",
@@ -397,6 +406,42 @@
     },
     "error": {
       "incomplete": "Answer every question to continue."
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "incomplete": "Finish your profile to see your matches.",
+    "empty": {
+      "title": "No one's looking here just yet",
+      "body": "We only show people whose area, budget and timing could fit yours. Check back soon — new people arrive quietly."
+    },
+    "scoreLabel": "Compatibility score: {{value}} percent",
+    "viewReport": "View report",
+    "tiers": {
+      "strong-overlap": {
+        "name": "Strong Overlap",
+        "description": "Your lifestyles line up on most things."
+      },
+      "worth-a-chat": {
+        "name": "Worth a Chat",
+        "description": "Enough in common to be worth a hello."
+      },
+      "likely-friction": {
+        "name": "Likely Friction",
+        "description": "A few habits may clash at home."
+      }
+    },
+    "report": {
+      "title": "Why you two might work",
+      "you": "You",
+      "area": "Area",
+      "budget": "Budget",
+      "moveIn": "Move-in",
+      "align": "Aligned",
+      "partial": "Partially aligned",
+      "differ": "You differ",
+      "sharedHeading": "Where you align",
+      "differHeading": "Where you differ"
     }
   },
   "offline": {

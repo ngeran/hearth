@@ -46,45 +46,58 @@ checklist. The M2 plan that lived here previously is complete (9/9, shipped in `
 
 Run the local gate after every step; tick only when it passes. Fix failures before moving on.
 
-1. [ ] **Shared match module** — `packages/shared/src/match.ts` + `match.test.ts`: constants
+1. [x] **Shared match module** — `packages/shared/src/match.ts` + `match.test.ts`: constants
    (`COMPAT_STRONG_THRESHOLD`, `COMPAT_CHAT_THRESHOLD`, `AREA_MATCH_TOLERANCE`, `MATCHES_LIMIT`),
    `MatchTier`, `MatchCandidate`, `scoreCompatibility` (score/tier/dimensionScores/shared +
    friction ids), `matchEligibility` (the 5 gates, null passes), `deriveHabitTags` +
    `HABIT_TAG_IDS` (max 3, question order), `matchesResponseSchema` (strict). Unit tests: weights,
    rounding, symmetry, boundaries 74/75 + 49/50, identical → 100, opposite → 0, full gate matrix,
    tag rules. Export from the shared index. Verify: `pnpm --filter @hearth/shared test &&
-   pnpm --filter @hearth/shared typecheck`.
-2. [ ] **Worker matches route** — `apps/worker/src/routes/matches.ts` (requireSession; 403
+    pnpm --filter @hearth/shared typecheck`. — 34 new tests (69 shared total); typecheck green.
+2. [x] **Worker matches route** — `apps/worker/src/routes/matches.ts` (requireSession; 403
    `forbidden` when the caller's own onboarding is incomplete; SQL prefilter: not-self,
    `lifestyle_json NOT NULL`, `onboarding_completed_at NOT NULL`, `users.status = 'active'`,
    `deleted_at IS NULL`; per-candidate `toProfileSnapshot` → JS gates → scoring; sort score desc
    then displayName asc; limit 20) + `.route("/api/v1/matches", matchesRoutes)` in `index.ts` +
    fix the stale `scheduled()`/`queue()` comments. Verify: `pnpm --filter @hearth/worker
-   typecheck` + full gate.
-3. [ ] **Seed script** — `scripts/seed-matches.mjs` (`--count` default 12, `--seed` default 42,
+    typecheck` + full gate. — typecheck + 4 worker tests + lint + build dry-run green.
+3. [x] **Seed script** — `scripts/seed-matches.mjs` (`--count` default 12, `--seed` default 42,
    `--dry-run`; mulberry32; personas covering all 5 archetypes with expected-archetype notes;
    Athens-cluster areas, one campus cohort, budgets 250–700, windows inside 12 months, seeking
    weighted roommate/either; generates SQL → `corepack pnpm exec wrangler d1 execute
-   hearth-db-staging --remote --env staging --file`) + `"seed:matches"` script in root
+    hearth-db-staging --remote --env staging --file`) + `"seed:matches"` script in root
    `package.json`. Verify: `pnpm seed:matches --dry-run` prints SQL; a `node:sqlite` one-off in
-   `/tmp/opencode` applies it to a fresh 0000→0003 DB and counts 12 users/12 profiles.
-4. [ ] **Web data + locales** — `apps/web/src/lib/matches.ts` (`fetchMatches`, raw fetch +
+   `/tmp/opencode` applies it to a fresh 0000→0003 DB and counts 12 users/12 profiles. — proof:
+   12/12 complete rows, archetypes derive as expected, double-apply idempotent (INSERT OR
+   REPLACE).
+4. [x] **Web data + locales** — `apps/web/src/lib/matches.ts` (`fetchMatches`, raw fetch +
    `matchesResponseSchema`) + `use-matches.ts` (`["matches"]`, `retry: false`, `staleTime:
-   60_000`); locale keys at parity: tier names/descriptions, habit tags (`lifestyle.tags.*`),
+    60_000`); locale keys at parity: tier names/descriptions, habit tags (`lifestyle.tags.*`),
    report copy (title, logistics labels, you/them, align/partially/differ sr labels,
    shared/friction headings), empty state, `profile.lifestyle.body` update. Verify:
-   `pnpm check:i18n && pnpm --filter @hearth/web typecheck`.
-5. [ ] **Matches UI** — `match-card.tsx` (initials avatar, name, area, tier-colored score badge,
+   `pnpm check:i18n && pnpm --filter @hearth/web typecheck`. — 296 keys en+el parity; typecheck
+   green.
+5. [x] **Matches UI** — `match-card.tsx` (initials avatar, name, area, tier-colored score badge,
    tags), `compatibility-report.tsx` (score + tier line, Area/Budget/Move-in rows You vs them, 5
    dimension rows with both option labels + sr-labelled mark, shared/friction chips), new
    `matches-route.tsx` (empty/loading/error, selection, `lg:` two-pane, mobile overlay panel with
    close, keyboard + 360 px); `router.tsx`: replace the placeholder with `RequireAuth` +
-   `MatchesRoute`. Verify: full gate.
-6. [ ] **e2e stays green** — run `pnpm test:e2e` (NixOS wrapper below); if any spec asserted the
+   `MatchesRoute`. Verify: full gate. — Gate green (typecheck ×3, lint, build, i18n 297 keys
+   en+el with one added `matches.incomplete` pair for the incomplete-profile state, 69+4 tests).
+   Dimension rows show mark + % (thresholds reuse `COMPAT_*`); report logistics is a You/them
+   table; mobile overlay traps Escape + focuses itself.
+6. [x] **e2e stays green** — run `pnpm test:e2e` (NixOS wrapper below); if any spec asserted the
    old Matches placeholder copy, update it to the new screen. Verify: e2e green locally.
-7. [ ] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M3.md` ledger +
+   Status: 8/8 passed via the NixOS LD_LIBRARY_PATH wrapper (single invocation); no spec
+   referenced the placeholder copy or /matches, so no spec changes were needed; the
+   `[WebServer] api_error TypeError` lines are the known tolerated local-Wrangler noise.
+7. [x] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M3.md` ledger +
    verification log, full gate, `reviewer` subagent on the diff, commit. Verify: reviewer findings
    addressed, tree committed; owner pushes and CI + Deploy staging go green.
+   Status: reviewer found no blockers; fixed the one spec deviation (report dimension rows now
+   show both sides' option labels), added the overlay Tab trap + focus restore, corrected a seed
+   comment; the focus-visible nit was withdrawn (global `:focus-visible` rule already styles the
+   card). Full gate green.
 8. [ ] **Stage the seeds** — after the deploy is green: run `pnpm seed:matches` against staging,
    verify with a `wrangler d1 execute … --command "SELECT count(*) …"` row count, and have the
    owner eyeball `/matches`. Verify: seed count correct, owner sees seeded matches.

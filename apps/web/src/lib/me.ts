@@ -36,7 +36,7 @@ async function readError(response: Response): Promise<ApiRequestError> {
   return new ApiRequestError("request_failed", response.status);
 }
 
-async function requestJson<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
+export async function requestJson<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
   if (!response.ok) {
     throw await readError(response);
   }

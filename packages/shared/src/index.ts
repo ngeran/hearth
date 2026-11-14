@@ -4,4 +4,5 @@ export * from "./constants";
 export * from "./health";
 export * from "./image";
 export * from "./lifestyle";
+export * from "./match";
 export * from "./profile";

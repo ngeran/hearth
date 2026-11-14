@@ -21,6 +21,7 @@
     "test:e2e": "pnpm build:web && playwright test",
     "check:i18n": "node scripts/check-i18n.mjs",
     "sim": "node scripts/sim.mjs",
+    "seed:matches": "node scripts/seed-matches.mjs",
     "icons": "node scripts/generate-icons.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply hearth-db --local --config wrangler.jsonc",

@@ -8,6 +8,7 @@ import { ChatRoom } from "./chat-room";
 import type { Env } from "./env";
 import { requireSameOrigin } from "./middleware/session";
 import { campusesRoutes } from "./routes/campuses";
+import { matchesRoutes } from "./routes/matches";
 import { meRoutes } from "./routes/me";
 import type { AppEnv } from "./types";
 
@@ -67,6 +68,7 @@ const routes = app
   .on(["GET", "POST"], "/api/auth/*", async (c) => createAuth(c.env).handler(c.req.raw))
   .route("/api/v1/me", meRoutes)
   .route("/api/v1/campuses", campusesRoutes)
+  .route("/api/v1/matches", matchesRoutes)
   .notFound((c) =>
     c.json(
       {
@@ -105,9 +107,10 @@ export { ChatRoom };
 export default {
   fetch: routes.fetch,
   async scheduled() {
-    // Weekly matching batch arrives in milestone 3.
+    // Deliberately empty: M3 computes matches on read (docs/specs/M3.md);
+    // a batch only becomes interesting at MATCH_POOL_THRESHOLD.
   },
   async queue() {
-    // Queue consumers arrive with matching and email in milestones 1 and 3.
+    // Queue consumers arrive with their future milestones (chat, email jobs).
   },
 } satisfies ExportedHandler<Env>;

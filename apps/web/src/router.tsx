@@ -4,6 +4,7 @@ import { AppShell } from "@/components/app-shell";
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { RequireAuth } from "@/components/require-auth";
 import { HomeRoute } from "@/routes/home-route";
+import { MatchesRoute } from "@/routes/matches-route";
 import { NotFoundRoute } from "@/routes/not-found-route";
 import { OnboardingRoute } from "@/routes/onboarding-route";
 import { ProfileRoute } from "@/routes/profile-route";
@@ -32,7 +33,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "matches",
-        element: <PlaceholderPage kind="matches" />,
+        element: (
+          <RequireAuth>
+            <MatchesRoute />
+          </RequireAuth>
+        ),
       },
       {
         path: "messages",

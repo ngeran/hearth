@@ -7,8 +7,9 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M3 — matching engine, matches UI, compatibility report — spec drafted (`docs/specs/M3.md`),
-pending owner review of tier/tag/report wording, then build per `PLAN.md`. M2 (lifestyle
+M3 — matching engine, matches UI, compatibility report — implementation complete per
+`docs/specs/M3.md` and `PLAN.md` steps 1–7; pending commit push → CI + staging deploy → step 8
+(seed staging via `pnpm seed:matches`) → owner approval before M4 (chat). M2 (lifestyle
 questionnaire) shipped in `30e6998` and is live on staging. The 8-tester round moves to the end of
 the M2–M6 roadmap the owner approved on 2026-11-14. M1 Worker and Playwright tests stay deferred
 at the user's request (see `docs/specs/M1.md`); M3 adds shared unit tests only, and the existing
