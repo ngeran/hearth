@@ -7,13 +7,13 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M3 — matching engine, matches UI, compatibility report — implementation complete per
-`docs/specs/M3.md` and `PLAN.md` steps 1–7; pending commit push → CI + staging deploy → step 8
-(seed staging via `pnpm seed:matches`) → owner approval before M4 (chat). M2 (lifestyle
-questionnaire) shipped in `30e6998` and is live on staging. The 8-tester round moves to the end of
-the M2–M6 roadmap the owner approved on 2026-11-14. M1 Worker and Playwright tests stay deferred
-at the user's request (see `docs/specs/M1.md`); M3 adds shared unit tests only, and the existing
-e2e smoke suite stays green.
+M4 — 1:1 chat on the ChatRoom Durable Object — spec drafted per `docs/specs/M4.md`, pending owner
+review of the spec before `PLAN.md` build steps start. M3 (matching engine, matches UI,
+compatibility report) shipped in `0f663f0`, is live on staging with seeded synthetic matches, and
+is owner-approved. M2 (lifestyle questionnaire) shipped in `30e6998`. The 8-tester round moves to
+the end of the M2–M6 roadmap the owner approved on 2026-11-14. M1 Worker and Playwright tests
+stay deferred at the user's request (see `docs/specs/M1.md`); M4 adds a Durable Object unit test
+plus shared unit tests, and the existing e2e smoke suite stays green.
 
 ## Stack
 
