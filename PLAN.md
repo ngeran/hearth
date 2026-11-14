@@ -127,9 +127,12 @@ Run the local gate after every step; tick only when it passes. Fix failures befo
    plural forms, encodeURIComponent on `?with=`; index-name/read-marker/lazy-meta deltas
    documented). CLAUDE.md + ledgers updated; gate green (313 keys, 89 shared + 13 worker);
    e2e 8/8. Owner push + CI/deploy verification pending (same pattern as M3).
-9. [ ] **Staging spot-check** — after deploy: agent verifies health + endpoint envelopes; owner
+9. [x] **Staging spot-check** — after deploy: agent verifies health + endpoint envelopes; owner
    opens a chat between two real accounts on staging and says hi. Verify: owner confirms chat
    works end-to-end; tick `M4.md` ledger.
+   - Status: CI + Deploy staging green on d94d8a8; GET / 200, /api/v1/health ok; 0004 applied
+     remote ("No migrations to apply!"); M4.md ledger ticked. Owner approved proceeding to M5
+     (2026-11-14) — two-account live-chat exercise folds into the pre-tester validation.
 
 ### NixOS e2e note (Playwright browser libs)
 
