@@ -263,6 +263,8 @@ export const matchItemSchema = z
     moveInFrom: z.string().nullable(),
     moveInTo: z.string().nullable(),
     campusId: z.string().nullable(),
+    /** M5: the member currently has an active room listing. */
+    hasRoom: z.boolean(),
     score: z.number().int().min(0).max(100),
     tier: z.enum(MATCH_TIERS),
     dimensionScores: dimensionScoresSchema,

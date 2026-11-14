@@ -11,6 +11,7 @@ import { campusesRoutes } from "./routes/campuses";
 import { chatsRoutes } from "./routes/chats";
 import { matchesRoutes } from "./routes/matches";
 import { meRoutes } from "./routes/me";
+import { roomsRoutes } from "./routes/rooms";
 import type { AppEnv } from "./types";
 
 const app = new Hono<AppEnv>();
@@ -71,6 +72,7 @@ const routes = app
   .route("/api/v1/campuses", campusesRoutes)
   .route("/api/v1/matches", matchesRoutes)
   .route("/api/v1/chats", chatsRoutes)
+  .route("/api/v1/rooms", roomsRoutes)
   .notFound((c) =>
     c.json(
       {

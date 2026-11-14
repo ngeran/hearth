@@ -15,7 +15,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 
 import { createDb } from "../db/client";
-import { chatThreads, profiles, users } from "../db/schema";
+import { chatThreads, profiles, rooms, users } from "../db/schema";
 import type { Env } from "../env";
 import { toProfileSnapshot } from "../lib/profiles";
 import { apiError, readJsonBody } from "../lib/responses";
@@ -158,13 +158,25 @@ chats.post("/", async (c) => {
 
   // Same gates as the matches list (M3): eligibility decides who may START a
   // chat; existing threads above stay readable even if gates later fail.
+  // Exception (M5.md Decision 4): a member with an ACTIVE room listing can
+  // always be contacted for that first thread — saying hi about a room must
+  // not depend on lifestyle gates. Both sides still need complete, active
+  // accounts, and every rule after thread creation (cooldown, purge) applies
+  // unchanged.
   const peerSnapshot = toProfileSnapshot(peerJoin.profile);
+  const peerHasActiveListing = Boolean(
+    await db
+      .select({ id: rooms.id })
+      .from(rooms)
+      .where(and(eq(rooms.listerId, peerId), eq(rooms.status, "active")))
+      .get(),
+  );
   if (
     peerJoin.user.status !== "active" ||
     peerJoin.user.deletedAt !== null ||
     !isOnboardingComplete(peerSnapshot) ||
     !peerSnapshot.lifestyle ||
-    !matchEligibility(meSnapshot, peerSnapshot)
+    (!peerHasActiveListing && !matchEligibility(meSnapshot, peerSnapshot))
   ) {
     return apiError(c, 403, "forbidden", "You are not currently matched with this member.");
   }

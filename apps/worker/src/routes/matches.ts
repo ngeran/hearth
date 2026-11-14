@@ -7,11 +7,11 @@ import {
   matchesResponseSchema,
   scoreCompatibility,
 } from "@hearth/shared";
-import { and, eq, isNotNull, isNull, ne } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createDb } from "../db/client";
-import { profiles, users } from "../db/schema";
+import { profiles, rooms, users } from "../db/schema";
 import { toProfileSnapshot } from "../lib/profiles";
 import { apiError } from "../lib/responses";
 import { requireSession } from "../middleware/session";
@@ -51,7 +51,9 @@ matches.get("/", async (c) => {
       ),
     );
 
-  const items: MatchItem[] = [];
+  // hasRoom is attached after slicing (one indexed rooms lookup), so the
+  // intermediate items are the MatchItem shape minus that field.
+  const items: Omit<MatchItem, "hasRoom">[] = [];
 
   for (const { profile } of rows) {
     const snapshot = toProfileSnapshot(profile);
@@ -98,7 +100,30 @@ matches.get("/", async (c) => {
       (a.displayName < b.displayName ? -1 : a.displayName > b.displayName ? 1 : 0),
   );
 
-  return c.json(matchesResponseSchema.parse({ matches: items.slice(0, MATCHES_LIMIT) }));
+  const visible = items.slice(0, MATCHES_LIMIT);
+
+  // M5 "has a room" filter: one indexed lookup instead of a per-row join.
+  const activeListers = visible.length
+    ? await db
+        .select({ listerId: rooms.listerId })
+        .from(rooms)
+        .where(
+          and(
+            eq(rooms.status, "active"),
+            inArray(
+              rooms.listerId,
+              visible.map((i) => i.userId),
+            ),
+          ),
+        )
+    : [];
+  const listerIds = new Set(activeListers.map((row) => row.listerId));
+
+  return c.json(
+    matchesResponseSchema.parse({
+      matches: visible.map((item) => ({ ...item, hasRoom: listerIds.has(item.userId) })),
+    }),
+  );
 });
 
 export const matchesRoutes = matches;

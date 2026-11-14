@@ -10,6 +10,7 @@
     "label": "Main navigation",
     "home": "Hearth home",
     "matches": "Matches",
+    "rooms": "Rooms",
     "messages": "Messages",
     "profile": "Profile",
     "signIn": "Sign in",
@@ -31,7 +32,8 @@
     "continue": "Continue",
     "cancel": "Cancel",
     "saving": "Saving…",
-    "close": "Close"
+    "close": "Close",
+    "edit": "Edit"
   },
   "validation": {
     "checkField": "Check this field.",
@@ -403,6 +405,10 @@
     },
     "scoreLabel": "Compatibility score: {{value}} percent",
     "viewReport": "View report",
+    "filters": {
+      "hasRoom": "Has a room",
+      "none": "No matches with this filter yet."
+    },
     "tiers": {
       "strong-overlap": {
         "name": "Strong Overlap",
@@ -460,6 +466,76 @@
       "hoursAgo_other": "{{count}} hours ago",
       "daysAgo_one": "1 day ago",
       "daysAgo_other": "{{count}} days ago"
+    }
+  },
+  "rooms": {
+    "title": "Rooms",
+    "incomplete": "Finish your profile to see room listings.",
+    "tagline": "Our place needs one more gentle soul",
+    "empty": {
+      "title": "No open rooms just yet",
+      "body": "Places looking for a roommate will appear here. Check back soon."
+    },
+    "createPrompt": {
+      "title": "Already have a place?",
+      "body": "Looking for a roommate for your own apartment?",
+      "action": "Create a listing"
+    },
+    "card": {
+      "rent": "{{rent}}€/month",
+      "billsIncluded": "bills included",
+      "availableFrom": "From {{date}}",
+      "match": "{{value}}% match",
+      "verified": "Verified"
+    },
+    "viewDetails": "Details",
+    "details": {
+      "about": "About the place",
+      "lister": "Listed by"
+    },
+    "myListing": {
+      "title": "Your listing",
+      "empty": "You don't have a listing yet."
+    },
+    "status": {
+      "active": "Active",
+      "withdrawn": "Withdrawn"
+    },
+    "form": {
+      "createTitle": "New room listing",
+      "editTitle": "Edit listing",
+      "title": "Title",
+      "titleHint": "A short name for the place, e.g. “Bright top-floor flat in Zografou”.",
+      "description": "Description",
+      "descriptionHint": "Tell future roommates about the place, who lives there, and what you hope for. 120–2000 characters.",
+      "area": "Area",
+      "areaHint": "A neighbourhood, never an exact address.",
+      "rent": "Monthly rent (€)",
+      "rentHint": "Between €50 and €5000.",
+      "bills": "Bills included in rent",
+      "availableFrom": "Available from",
+      "availableFromHint": "The date the room becomes free.",
+      "photos": "Photos",
+      "photosHint": "Up to 3 photos of the room and shared spaces. JPEG or PNG up to 5MB.",
+      "photoAdd": "Add photos",
+      "photoDelete": "Remove photo",
+      "photoFailed": "Photo upload failed. Try again.",
+      "save": "Save listing",
+      "delete": "Delete listing",
+      "withdraw": "Withdraw",
+      "reactivate": "Reactivate"
+    },
+    "errors": {
+      "title": "The title must be 5–80 characters.",
+      "description": "The description must be 120–2000 characters.",
+      "area": "Enter an area.",
+      "rent": "Rent must be between €50 and €5000.",
+      "date": "Enter a valid date."
+    },
+    "delete": {
+      "title": "Delete this listing?",
+      "body": "The listing and its photos are removed permanently.",
+      "confirm": "Delete"
     }
   },
   "offline": {

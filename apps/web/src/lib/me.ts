@@ -22,7 +22,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function readError(response: Response): Promise<ApiRequestError> {
+export async function readError(response: Response): Promise<ApiRequestError> {
   try {
     const parsed = apiErrorSchema.safeParse(await response.json());
 

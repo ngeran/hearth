@@ -87,6 +87,7 @@ function matchItem(overrides: Record<string, unknown> = {}): Record<string, unkn
     moveInFrom: "2027-01-01",
     moveInTo: "2027-04-01",
     campusId: null,
+    hasRoom: false,
     score: 85,
     tier: "strong-overlap",
     dimensionScores: dimensionScoresFixture,

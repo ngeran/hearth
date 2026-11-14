@@ -1,4 +1,4 @@
-import { Heart, LogIn, MessageCircle, UserRound } from "lucide-react";
+import { BedDouble, Heart, LogIn, MessageCircle, UserRound } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router-dom";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/matches", labelKey: "nav.matches", icon: Heart },
+  { to: "/rooms", labelKey: "nav.rooms", icon: BedDouble },
   { to: "/messages", labelKey: "nav.messages", icon: MessageCircle },
   { to: "/profile", labelKey: "nav.profile", icon: UserRound },
 ] as const;
@@ -158,7 +159,7 @@ export function AppShell() {
         aria-label={t("nav.label")}
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-1 px-2 py-2">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-1 px-2 py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
 

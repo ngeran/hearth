@@ -7,12 +7,12 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M5 — Rooms (household listings) per `docs/specs/M5.md`: spec + PLAN.md drafted from the Stitch #10
-reference (`docs/design/mockups/10-rooms-and-groups.md`), pending owner decisions-table approval,
-then build. Scope: single-lister listings with 0–3 photos, browse + details + say-hi via M4 chat,
-matches "has room" filter, 4th nav tab; team-up groups deferred. M4 (1:1 chat on the ChatRoom
-Durable Object) shipped in `d94d8a8` — CI + Deploy staging green, owner-approved; M3 (matching
-engine, matches UI, compatibility report)
+M5 — Rooms (household listings) per `docs/specs/M5.md`: implementation complete (PLAN steps 1–7;
+owner approved all six decision rows on 2026-11-15) — single-lister listings with 0–3 photos,
+browse + details + say-hi via M4 chat, matches "has room" filter, 4th nav tab; team-up groups
+deferred. Pending: push → CI + staging deploy → seeded listings → owner spot-check before M6.
+M4 (1:1 chat on the ChatRoom Durable Object) shipped in `d94d8a8` — CI + Deploy staging green,
+owner-approved; M3 (matching engine, matches UI, compatibility report)
 shipped in `0f663f0`, is live on staging with seeded synthetic matches, and is owner-approved. M2
 (lifestyle questionnaire) shipped in `30e6998`. The 8-tester round moves to the end of the M2–M6
 roadmap the owner approved on 2026-11-14. M1 Worker and Playwright tests stay deferred at the

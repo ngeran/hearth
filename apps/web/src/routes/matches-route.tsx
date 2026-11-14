@@ -24,6 +24,7 @@ export function MatchesRoute() {
   const matches = useMatches(Boolean(me.data?.complete));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
+  const [hasRoomOnly, setHasRoomOnly] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const lastTriggerRef = useRef<HTMLElement | null>(null);
 
@@ -32,14 +33,16 @@ export function MatchesRoute() {
   }, [t]);
 
   // Keep the desktop report pane useful without extra copy: preselect the
-  // first (best) match, and drop a selection that disappeared from the list.
+  // first (best) match, and drop a selection that disappeared from the list
+  // (including when the "has a room" filter removes it).
   useEffect(() => {
     const items = matches.data?.matches;
     if (!items || items.length === 0) return;
-    if (!items.some((match) => match.userId === selectedId)) {
-      setSelectedId(items[0]?.userId ?? null);
+    const visible = hasRoomOnly ? items.filter((match) => match.hasRoom) : items;
+    if (!visible.some((match) => match.userId === selectedId)) {
+      setSelectedId(visible[0]?.userId ?? null);
     }
-  }, [matches.data, selectedId]);
+  }, [matches.data, selectedId, hasRoomOnly]);
 
   // Escape closes the mobile report overlay; focus starts inside it, Tab is
   // trapped while it is open, and focus returns to the card that opened it.
@@ -126,7 +129,8 @@ export function MatchesRoute() {
   }
 
   const items = matches.data?.matches ?? [];
-  const selected = items.find((match) => match.userId === selectedId) ?? null;
+  const filtered = hasRoomOnly ? items.filter((match) => match.hasRoom) : items;
+  const selected = filtered.find((match) => match.userId === selectedId) ?? null;
 
   if (items.length === 0) {
     return (
@@ -140,13 +144,25 @@ export function MatchesRoute() {
     );
   }
 
+  if (filtered.length === 0) {
+    return (
+      <>
+        <h1 className="sr-only">{t("matches.title")}</h1>
+        <HasRoomFilter hasRoomOnly={hasRoomOnly} onToggle={() => setHasRoomOnly((v) => !v)} />
+        <p className="mt-6 text-base text-muted-foreground">{t("matches.filters.none")}</p>
+      </>
+    );
+  }
+
   return (
     <>
       <h1 className="sr-only">{t("matches.title")}</h1>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)]">
+      <HasRoomFilter hasRoomOnly={hasRoomOnly} onToggle={() => setHasRoomOnly((v) => !v)} />
+
+      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)]">
         <ul className="space-y-3">
-          {items.map((match) => (
+          {filtered.map((match) => (
             <MatchCard
               key={match.userId}
               match={match}
@@ -187,5 +203,23 @@ export function MatchesRoute() {
         </div>
       ) : null}
     </>
+  );
+}
+
+function HasRoomFilter({ hasRoomOnly, onToggle }: { hasRoomOnly: boolean; onToggle: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={hasRoomOnly}
+      className={
+        hasRoomOnly
+          ? "rounded-full border border-primary-container bg-primary-container px-3 py-1 text-xs font-medium text-on-primary-container"
+          : "rounded-full border border-outline-variant bg-surface-container-lowest px-3 py-1 text-xs font-medium text-on-surface-variant"
+      }
+    >
+      {t("matches.filters.hasRoom")}
+    </button>
   );
 }

@@ -27,6 +27,7 @@ import {
   chatThreads,
   passkey,
   profiles,
+  rooms,
   session,
   users,
   verification,
@@ -510,6 +511,18 @@ me.delete("/", async (c) => {
 
   if (profile?.photoKey) {
     await c.env.PHOTOS.delete(profile.photoKey);
+  }
+
+  // Room listing photos live in R2 under rooms/<id>/*; the FK cascade drops
+  // the listing rows themselves, so the bytes must be removed explicitly
+  // (missing keys delete as a no-op).
+  const myRooms = await db.select({ id: rooms.id }).from(rooms).where(eq(rooms.listerId, id));
+  for (const room of myRooms) {
+    await c.env.PHOTOS.delete([
+      `rooms/${room.id}/0.jpg`,
+      `rooms/${room.id}/1.jpg`,
+      `rooms/${room.id}/2.jpg`,
+    ]);
   }
 
   // Purge every conversation body from the ChatRoom Durable Objects before

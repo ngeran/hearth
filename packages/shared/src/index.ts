@@ -7,3 +7,4 @@ export * from "./image";
 export * from "./lifestyle";
 export * from "./match";
 export * from "./profile";
+export * from "./room";

@@ -8,6 +8,8 @@ import { MessagesRoute } from "@/routes/messages-route";
 import { NotFoundRoute } from "@/routes/not-found-route";
 import { OnboardingRoute } from "@/routes/onboarding-route";
 import { ProfileRoute } from "@/routes/profile-route";
+import { RoomEditRoute } from "@/routes/room-edit-route";
+import { RoomsRoute } from "@/routes/rooms-route";
 import { SignInRoute } from "@/routes/sign-in-route";
 
 export const router = createBrowserRouter([
@@ -44,6 +46,22 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <MessagesRoute />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "rooms",
+        element: (
+          <RequireAuth>
+            <RoomsRoute />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "rooms/edit",
+        element: (
+          <RequireAuth>
+            <RoomEditRoute />
           </RequireAuth>
         ),
       },

@@ -207,6 +207,38 @@ export const chatThreads = sqliteTable(
   ],
 );
 
+// M5 room listings. Photo bytes live in R2 (rooms/<id>/<n>.jpg); the
+// counter here drives the browse card and the photo endpoints. Rows
+// survive withdrawal (own history); browse filters status = 'active'.
+// One-active-per-lister is enforced at the route layer on purpose.
+export const rooms = sqliteTable(
+  "rooms",
+  {
+    id: text("id").primaryKey(),
+    listerId: text("lister_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    areaLabel: text("area_label").notNull(),
+    // Coords are optional like profile coords: the form collects a label,
+    // coordinates only exist when the lister's profile carries them.
+    areaLat: real("area_lat"),
+    areaLng: real("area_lng"),
+    rentEur: integer("rent_eur").notNull(),
+    billsIncluded: boolean("bills_included").notNull().default(false),
+    availableFrom: text("available_from").notNull(),
+    photoCount: integer("photo_count").notNull().default(0),
+    status: text("status").notNull().default("active"),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
+  },
+  (table) => [
+    index("idx_rooms_status_created").on(table.status, table.createdAt),
+    index("idx_rooms_lister").on(table.listerId),
+  ],
+);
+
 export const auditLog = sqliteTable(
   "audit_log",
   {
