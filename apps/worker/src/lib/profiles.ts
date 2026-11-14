@@ -7,6 +7,7 @@ import {
   type ProfileLanguage,
   type ProfilePatch,
   type ProfileSnapshot,
+  parseStoredLifestyle,
   userResponseSchema,
 } from "@hearth/shared";
 import { eq } from "drizzle-orm";
@@ -52,6 +53,7 @@ export function toProfileSnapshot(row: ProfileRow): ProfileSnapshot {
     campusId: row.campusId,
     language: asLanguage(row.language),
     bio: row.bio,
+    lifestyle: parseStoredLifestyle(row.lifestyleJson),
     ageConfirmed: row.ageConfirmed,
     academicEmail: row.academicEmail,
     academicEmailVerifiedAt: row.academicEmailVerifiedAt
@@ -163,6 +165,12 @@ export async function applyProfilePatch(
     ? (patch.language ?? current.language)
     : current.language;
   const bio = hasPatch(patch, "bio") ? (patch.bio ?? null) : current.bio;
+  // Store the exact validated envelope; preserve the raw column on unrelated
+  // patches so an unknown future version never gets silently destroyed.
+  const lifestyleJson = hasPatch(patch, "lifestyle")
+    ? JSON.stringify(patch.lifestyle)
+    : current.lifestyleJson;
+  const lifestyle = parseStoredLifestyle(lifestyleJson);
   const ageConfirmed = hasPatch(patch, "ageConfirmed")
     ? (patch.ageConfirmed ?? current.ageConfirmed)
     : current.ageConfirmed;
@@ -207,6 +215,7 @@ export async function applyProfilePatch(
     campusId,
     language: asLanguage(language),
     bio,
+    lifestyle,
     ageConfirmed,
     updatedAt: toUnixSeconds(now),
   };
@@ -231,6 +240,7 @@ export async function applyProfilePatch(
       campusId,
       language,
       bio,
+      lifestyleJson,
       ageConfirmed,
       onboardingCompletedAt,
       updatedAt: now,

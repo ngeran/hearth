@@ -140,6 +140,9 @@ export const profiles = sqliteTable(
     campusId: text("campus_id").references(() => campuses.id, { onDelete: "set null" }),
     language: text("language").notNull().default("en"),
     bio: text("bio"),
+    // Versioned lifestyle questionnaire envelope ({ version, answers }); parsed
+    // and validated with the shared schema on every read, never raw.
+    lifestyleJson: text("lifestyle_json"),
     ageConfirmed: boolean("age_confirmed").notNull().default(false),
     academicEmail: text("academic_email"),
     academicEmailVerifiedAt: timestamp("academic_email_verified_at"),

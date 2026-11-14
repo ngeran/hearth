@@ -7,9 +7,11 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M1 — auth and profiles — implementation complete, waiting for approval before M2. M1 Worker and Playwright
-tests are deferred at the user's request (see `docs/specs/M1.md`); shared unit tests and the existing
-Worker health test stay in CI.
+M2 — lifestyle questionnaire — implementation complete (all ledger items in `docs/specs/M2.md`),
+pending the local wrap-up gate → commit → owner push → CI + staging deploy, then owner approval
+before M3 (matching engine). The 8-tester round moves to the end of the M2–M6 roadmap the owner
+approved on 2026-11-14. M1 Worker and Playwright tests stay deferred at the user's request (see
+`docs/specs/M1.md`); M2 adds shared unit tests only, and the existing e2e smoke suite stays green.
 
 ## Stack
 

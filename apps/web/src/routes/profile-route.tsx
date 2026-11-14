@@ -5,12 +5,15 @@ import {
   DISPLAY_NAME_MIN_LENGTH,
   isCampusLifeStage,
   LIFE_STAGES,
+  LIFESTYLE_VERSION,
   type LifeStage,
+  type LifestyleAnswers,
+  lifestyleAnswersSchema,
   type MeResponse,
-  type OnboardingFormValues,
-  onboardingFormSchema,
   PROFILE_LANGUAGES,
+  type ProfileFormValues,
   type ProfilePatch,
+  profileFormSchema,
   SEEKING_TYPES,
   type SeekingType,
 } from "@hearth/shared";
@@ -19,6 +22,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircle2,
   Download,
+  Home,
   KeyRound,
   LogOut,
   MailCheck,
@@ -33,6 +37,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/form-controls";
+import { LifestyleQuestionnaire } from "@/components/lifestyle-questionnaire";
+import { LifestyleSummary } from "@/components/lifestyle-summary";
 import { PageError, PageLoading } from "@/components/page-states";
 import { PhotoField } from "@/components/photo-field";
 import { Button } from "@/components/ui/button";
@@ -81,7 +87,7 @@ type DataErrorKey =
   | "profile.passkeys.addFailed"
   | "profile.passkeys.deleteFailed";
 
-function defaultsFor(me: MeResponse, fallbackLanguage: "en" | "el"): OnboardingFormValues {
+function defaultsFor(me: MeResponse, fallbackLanguage: "en" | "el"): ProfileFormValues {
   return {
     displayName: me.profile.displayName ?? "",
     areaLabel: me.profile.areaLabel ?? "",
@@ -94,6 +100,10 @@ function defaultsFor(me: MeResponse, fallbackLanguage: "en" | "el"): OnboardingF
     campusId: me.profile.campusId,
     language: me.profile.language ?? fallbackLanguage,
     bio: me.profile.bio ?? "",
+    // Optional in ProfileFormValues (Zod .optional() allows undefined), so a
+    // plain ?? undefined works here — unlike onboarding, where the required
+    // field needs the key conditionally spread under exactOptionalPropertyTypes.
+    lifestyle: me.profile.lifestyle ?? undefined,
     ageConfirmed: me.profile.ageConfirmed,
   };
 }
@@ -147,8 +157,8 @@ function ProfileContent({ me }: { me: MeResponse }) {
     getValues,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<OnboardingFormValues>({
-    resolver: zodResolver(onboardingFormSchema),
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: defaultsFor(me, normalizeLanguage(i18n.resolvedLanguage)),
     mode: "onTouched",
   });
@@ -165,7 +175,7 @@ function ProfileContent({ me }: { me: MeResponse }) {
     }
   }, [lifeStage, getValues, setValue]);
 
-  const onSubmit = async (values: OnboardingFormValues) => {
+  const onSubmit = async (values: ProfileFormValues) => {
     setSaveState("idle");
 
     try {
@@ -578,6 +588,7 @@ function ProfileContent({ me }: { me: MeResponse }) {
         </Button>
       </form>
 
+      <LifestyleCard me={me} />
       <AcademicEmailCard me={me} />
       <PasskeysCard
         passkeys={passkeys}
@@ -827,6 +838,122 @@ function AcademicEmailCard({ me }: { me: MeResponse }) {
             </Button>
           </div>
         </form>
+      )}
+    </section>
+  );
+}
+
+function LifestyleCard({ me }: { me: MeResponse }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  // Partial drafts survive open/close of the editor; only a complete set is
+  // ever saved (all-or-nothing, same contract as the onboarding step).
+  const [answers, setAnswers] = useState<Partial<LifestyleAnswers>>(
+    me.profile.lifestyle?.answers ?? {},
+  );
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorKey, setErrorKey] = useState<
+    "profile.saveFailed" | "lifestyle.error.incomplete" | null
+  >(null);
+
+  const save = async () => {
+    const parsed = lifestyleAnswersSchema.safeParse(answers);
+
+    if (!parsed.success) {
+      setErrorKey("lifestyle.error.incomplete");
+      return;
+    }
+
+    setBusy(true);
+    setErrorKey(null);
+
+    try {
+      const response = await updateMe({
+        lifestyle: { version: LIFESTYLE_VERSION, answers: parsed.data },
+      });
+      queryClient.setQueryData(["me"], response);
+      setEditing(false);
+    } catch {
+      setErrorKey("profile.saveFailed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="space-y-4 rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-secondary">
+          <Home aria-hidden="true" className="size-5" />
+        </span>
+        <div>
+          <h2 className="text-headline-md">{t("profile.lifestyle.title")}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {t("profile.lifestyle.body")}
+          </p>
+        </div>
+      </div>
+
+      {errorKey ? (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {t(errorKey)}
+        </p>
+      ) : null}
+
+      {editing ? (
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void save();
+          }}
+          noValidate
+        >
+          <LifestyleQuestionnaire
+            idPrefix="profile-lifestyle"
+            answers={answers}
+            onChange={setAnswers}
+            showErrors={errorKey === "lifestyle.error.incomplete"}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? t("common.saving") : t("profile.save")}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => {
+                setEditing(false);
+                setErrorKey(null);
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </form>
+      ) : me.profile.lifestyle ? (
+        <>
+          <LifestyleSummary profile={me.profile.lifestyle} heading="h3" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setEditing(true);
+              setErrorKey(null);
+            }}
+          >
+            {t("profile.lifestyle.change")}
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">{t("profile.lifestyle.empty")}</p>
+          <Button type="button" variant="outline" onClick={() => setEditing(true)}>
+            {t("profile.lifestyle.answer")}
+          </Button>
+        </>
       )}
     </section>
   );

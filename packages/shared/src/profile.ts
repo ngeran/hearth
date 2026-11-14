@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "./constants";
+import { type LifestyleProfile, lifestyleEnvelopeSchema } from "./lifestyle";
 
 export const DISPLAY_NAME_MIN_LENGTH = 2;
 export const DISPLAY_NAME_MAX_LENGTH = 50;
@@ -59,6 +60,7 @@ export const ONBOARDING_FIELDS = [
   "seeking",
   "lifeStage",
   "bio",
+  "lifestyle",
   "ageConfirmed",
 ] as const;
 export type OnboardingField = (typeof ONBOARDING_FIELDS)[number];
@@ -133,6 +135,7 @@ export const profilePatchSchema = z
     campusId: z.string().trim().min(1).max(64).nullable().optional(),
     language: z.enum(PROFILE_LANGUAGES).optional(),
     bio: bioSchema.optional(),
+    lifestyle: lifestyleEnvelopeSchema.optional(),
     ageConfirmed: z.boolean().optional(),
   })
   .strict()
@@ -182,6 +185,7 @@ export const onboardingFormSchema = z
     campusId: z.string().trim().min(1).max(64).nullable(),
     language: z.enum(PROFILE_LANGUAGES),
     bio: bioSchema,
+    lifestyle: lifestyleEnvelopeSchema,
     ageConfirmed: z.boolean().refine((value) => value, {
       message: "You must confirm that you are 18 or older.",
     }),
@@ -190,6 +194,35 @@ export const onboardingFormSchema = z
   .superRefine(addRangeIssues);
 
 export type OnboardingFormValues = z.infer<typeof onboardingFormSchema>;
+
+/**
+ * The profile edit form: identical to the onboarding contract except the
+ * lifestyle envelope is optional. The lifestyle section saves on its own
+ * (all ten answers at once), and members without answers must still be able
+ * to save every other profile edit.
+ */
+export const profileFormSchema = z
+  .object({
+    displayName: displayNameSchema,
+    areaLabel: areaLabelSchema,
+    moveInFrom: moveInDateSchema,
+    moveInTo: moveInDateSchema,
+    budgetMin: budgetAmountSchema,
+    budgetMax: budgetAmountSchema,
+    seeking: z.enum(SEEKING_TYPES),
+    lifeStage: z.enum(LIFE_STAGES),
+    campusId: z.string().trim().min(1).max(64).nullable(),
+    language: z.enum(PROFILE_LANGUAGES),
+    bio: bioSchema,
+    lifestyle: lifestyleEnvelopeSchema.optional(),
+    ageConfirmed: z.boolean().refine((value) => value, {
+      message: "You must confirm that you are 18 or older.",
+    }),
+  })
+  .strict()
+  .superRefine(addRangeIssues);
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export interface ProfileSnapshot {
   displayName: string | null;
@@ -206,6 +239,7 @@ export interface ProfileSnapshot {
   campusId: string | null;
   language: ProfileLanguage;
   bio: string | null;
+  lifestyle: LifestyleProfile | null;
   ageConfirmed: boolean;
   academicEmail: string | null;
   academicEmailVerifiedAt: number | null;
@@ -228,6 +262,7 @@ export const profileSnapshotSchema = z.object({
   campusId: z.string().nullable(),
   language: z.enum(PROFILE_LANGUAGES),
   bio: z.string().nullable(),
+  lifestyle: lifestyleEnvelopeSchema.nullable(),
   ageConfirmed: z.boolean(),
   academicEmail: z.string().nullable(),
   academicEmailVerifiedAt: z.number().int().nullable(),
@@ -284,6 +319,10 @@ export function getMissingOnboardingFields(profile: ProfileSnapshot): Onboarding
   const bio = profile.bio?.trim() ?? "";
   if (bio.length < BIO_MIN_LENGTH || bio.length > BIO_MAX_LENGTH) {
     missing.push("bio");
+  }
+
+  if (!profile.lifestyle) {
+    missing.push("lifestyle");
   }
 
   if (!profile.ageConfirmed) {

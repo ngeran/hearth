@@ -39,7 +39,7 @@ checklist. The restyle plan that lived here previously is complete (12/12, shipp
 
 Run the local gate after every step; tick only when it passes. Fix failures before moving on.
 
-1. [ ] **Shared lifestyle module** — `packages/shared/src/lifestyle.ts`:
+1. [x] **Shared lifestyle module** — `packages/shared/src/lifestyle.ts`:
    `LIFESTYLE_VERSION`, `LIFESTYLE_DIMENSIONS`, `LIFESTYLE_QUESTIONS` (10 ids + dimension +
    order), `LIFESTYLE_QUESTION_IDS`, level type, `lifestyleEnvelopeSchema` (strict: version
    literal, all 10 ids at levels 0|1|2, no extras), `parseStoredLifestyle` (defensive read:
@@ -48,34 +48,34 @@ Run the local gate after every step; tick only when it passes. Fix failures befo
    input, all 5 archetype branches + boundaries (socialScore 1 vs 2, late+social 2 vs 3). Export
    from the shared index. Verify: `pnpm --filter @hearth/shared test && pnpm --filter
    @hearth/shared typecheck`.
-2. [ ] **Shared profile integration** — `profile.ts`: `lifestyle: LifestyleProfile | null` in
+2. [x] **Shared profile integration** — `profile.ts`: `lifestyle: LifestyleProfile | null` in
    `ProfileSnapshot` + snapshot schema, `lifestyle` key in `profilePatchSchema` and
    `onboardingFormSchema`, `lifestyle` in `ONBOARDING_FIELDS` + `getMissingOnboardingFields`
    (missing when null). Verify: shared tests cover the completeness boundary (complete profile
    without lifestyle → missing `lifestyle`) + `pnpm --filter @hearth/shared typecheck`.
-3. [ ] **Migration + Drizzle schema** — `apps/worker/src/db/schema.ts` adds `lifestyleJson`
+3. [x] **Migration + Drizzle schema** — `apps/worker/src/db/schema.ts` adds `lifestyleJson`
    nullable text; `migrations/0003_lifestyle.sql` adds the column with a `json_valid` CHECK.
    Verify with a `node:sqlite` one-off in `/tmp/opencode`: apply 0000→0003, re-apply
    idempotently, insert a row with invalid JSON → rejected by CHECK, valid envelope → accepted.
-4. [ ] **Worker API wiring** — `apps/worker/src/lib/profiles.ts` + `routes/me.ts`: accept the
+4. [x] **Worker API wiring** — `apps/worker/src/lib/profiles.ts` + `routes/me.ts`: accept the
    `lifestyle` patch key (all-or-nothing, shared schema), persist the JSON string, parse via
    `parseStoredLifestyle` on read, surface in `GET /api/v1/me` and the export payload.
    Verify: `pnpm --filter @hearth/worker typecheck` + full gate (no Worker runtime tests exist —
    deferred per M1; typecheck + build dry-run is the local proof).
-5. [ ] **Locale keys** — questions (label + 3 options), dimension names, archetype names +
+5. [x] **Locale keys** — questions (label + 3 options), dimension names, archetype names +
    one-line descriptions + the "why" line, step/section/empty-state copy in `en.json` + `el.json`
    at exact parity, Greek from the approved spec table. Verify: `pnpm check:i18n`.
-6. [ ] **Web components** — `lifestyle-questionnaire.tsx` (5 fieldset/legend dimension groups,
+6. [x] **Web components** — `lifestyle-questionnaire.tsx` (5 fieldset/legend dimension groups,
    3-option radio rows, error wiring, 360 px) + `lifestyle-summary.tsx` ("What we learned about
    you": 5 dimension lines, archetype name/description, why-line). Verify: `pnpm --filter
    @hearth/web typecheck`.
-7. [ ] **Onboarding integration** — new Lifestyle step between Living and Finish (6 steps,
+7. [x] **Onboarding integration** — new Lifestyle step between Living and Finish (6 steps,
    progress bar denominators, STEP_FIELDS for the lifestyle patch, all answered before Continue,
    review step mentions lifestyle, summary shown after finishing). Verify: full gate.
-8. [ ] **Profile integration** — "Your lifestyle" section (summary + change answers + save),
+8. [x] **Profile integration** — "Your lifestyle" section (summary + change answers + save),
    empty state, loading/error states. Existing complete profiles re-enter onboarding once via
    the existing guard — verified by the shared completeness test in step 2. Verify: full gate.
-9. [ ] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M2.md` ledger +
+9. [x] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M2.md` ledger +
    verification log, full gate + `pnpm test:e2e` (NixOS wrapper below), `reviewer` subagent on
    the diff, commit. Verify: e2e green locally, reviewer findings addressed, tree committed.
 

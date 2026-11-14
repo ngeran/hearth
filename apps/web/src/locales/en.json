@@ -29,6 +29,7 @@
     "retry": "Try again",
     "back": "Back",
     "continue": "Continue",
+    "cancel": "Cancel",
     "saving": "Saving…"
   },
   "validation": {
@@ -98,6 +99,10 @@
       "living": {
         "title": "How do you want to live?",
         "body": "A few words about you and what you are looking for."
+      },
+      "lifestyle": {
+        "title": "How do you live at home?",
+        "body": "Ten quick questions. There are no right answers — just your normal week."
       },
       "finish": {
         "title": "All set?",
@@ -171,6 +176,13 @@
       "label": "A few words about you",
       "hint": "Between {{min}} and {{max}} characters.",
       "count": "{{count}} / {{max}} characters"
+    },
+    "lifestyle": {
+      "title": "Your lifestyle",
+      "body": "How you live at home. Only you can see this for now.",
+      "change": "Change answers",
+      "empty": "Answer the ten lifestyle questions to describe how you live.",
+      "answer": "Answer the questions"
     },
     "language": {
       "label": "App language",
@@ -264,6 +276,127 @@
     "profile": {
       "title": "Profile",
       "body": "Tell Hearth how you live and what matters to you. You stay in control of what is visible."
+    }
+  },
+  "lifestyle": {
+    "dimensions": {
+      "social-rhythm": "Social rhythm",
+      "cleanliness": "Cleanliness",
+      "kitchen-sharing": "Kitchen sharing",
+      "quiet-hours": "Quiet hours",
+      "guests-partners": "Guests & partners"
+    },
+    "questions": {
+      "social-gatherings": {
+        "label": "How often do you like having people over?",
+        "options": {
+          "0": "Rarely",
+          "1": "Sometimes",
+          "2": "Often"
+        }
+      },
+      "social-weeknights": {
+        "label": "A typical weeknight for you is…",
+        "options": {
+          "0": "A quiet night in",
+          "1": "A bit of both",
+          "2": "Out or with friends"
+        }
+      },
+      "clean-tidy": {
+        "label": "How do you keep your own space?",
+        "options": {
+          "0": "I tidy as I go",
+          "1": "A weekly tidy-up",
+          "2": "When it bothers me"
+        }
+      },
+      "clean-shared": {
+        "label": "Shared spaces work best when…",
+        "options": {
+          "0": "There is a simple routine",
+          "1": "We take turns naturally",
+          "2": "Everyone does their own thing"
+        }
+      },
+      "kitchen-cooking": {
+        "label": "The kitchen, for you, is…",
+        "options": {
+          "0": "Where I cook proper meals",
+          "1": "For quick meals",
+          "2": "Mostly for coffee and take-away"
+        }
+      },
+      "kitchen-sharing": {
+        "label": "Cooking or sharing meals with a flatmate sounds…",
+        "options": {
+          "0": "Great, let's share",
+          "1": "Nice now and then",
+          "2": "I prefer my own food routine"
+        }
+      },
+      "quiet-schedule": {
+        "label": "Your day usually winds down…",
+        "options": {
+          "0": "Early, before 23:00",
+          "1": "Around midnight",
+          "2": "Late, after 01:00"
+        }
+      },
+      "quiet-noise": {
+        "label": "On weeknights, noise in shared spaces…",
+        "options": {
+          "0": "Should stay low after 23:00",
+          "1": "Is fine if reasonable",
+          "2": "Does not bother you much"
+        }
+      },
+      "guests-overnight": {
+        "label": "Overnight guests…",
+        "options": {
+          "0": "Rarely",
+          "1": "Now and then",
+          "2": "Often"
+        }
+      },
+      "guests-partner": {
+        "label": "A flatmate's partner staying over some nights is…",
+        "options": {
+          "0": "Totally fine",
+          "1": "Fine if you talk first",
+          "2": "Not ideal"
+        }
+      }
+    },
+    "archetypes": {
+      "night-owl-haven": {
+        "name": "Night Owl Haven",
+        "description": "Your evenings run late and your circle stays small. Home is at its calmest after dark."
+      },
+      "quiet-mornings": {
+        "name": "Quiet Mornings",
+        "description": "Early to bed, quiet nights and a gentle start to the day. You keep things light and low-key."
+      },
+      "calm-sanctuary": {
+        "name": "Calm Sanctuary",
+        "description": "You keep your circle small and your evenings easy. Home is where you recharge."
+      },
+      "steady-rhythm": {
+        "name": "Steady Rhythm",
+        "description": "A bit of company, a bit of quiet. You flex with the week and keep a steady middle."
+      },
+      "open-door": {
+        "name": "Open Door",
+        "description": "People and plans are part of your week. Your door — and your kitchen — are usually open."
+      }
+    },
+    "summary": {
+      "title": "What we learned about you",
+      "changeHint": "You can change any answer later.",
+      "archetypeLabel": "Your home style"
+    },
+    "error": {
+      "incomplete": "Answer every question to continue."
     }
   },
   "offline": {

@@ -3,9 +3,15 @@ import {
   BIO_MIN_LENGTH,
   DISPLAY_NAME_MAX_LENGTH,
   DISPLAY_NAME_MIN_LENGTH,
+  deriveLifestyleArchetype,
   isCampusLifeStage,
   LIFE_STAGES,
+  LIFESTYLE_VERSION,
   type LifeStage,
+  type LifestyleAnswers,
+  type LifestyleArchetype,
+  type LifestyleProfile,
+  lifestyleAnswersSchema,
   type MeResponse,
   type OnboardingFormValues,
   onboardingFormSchema,
@@ -23,6 +29,8 @@ import { useTranslation } from "react-i18next";
 
 import { AuthShell } from "@/components/auth-shell";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/form-controls";
+import { LifestyleQuestionnaire } from "@/components/lifestyle-questionnaire";
+import { LifestyleSummary } from "@/components/lifestyle-summary";
 import { PageError, PageLoading } from "@/components/page-states";
 import { PhotoField } from "@/components/photo-field";
 import { Button } from "@/components/ui/button";
@@ -31,7 +39,11 @@ import { fetchCampuses, updateMe } from "@/lib/me";
 import { useMe } from "@/lib/use-me";
 import { cn } from "@/lib/utils";
 
-const STEP_COUNT = 5;
+const STEP_COUNT = 6;
+
+// Zero-based index of the lifestyle questionnaire step (after Living, before
+// Finish), so the Continue gate and rendering reference it by name.
+const LIFESTYLE_STEP = 4;
 
 // Static segment numbers for the progress indicator; the list never reorders.
 const PROGRESS_SEGMENTS = Array.from({ length: STEP_COUNT }, (_, index) => index + 1);
@@ -41,6 +53,7 @@ const STEP_COPY = [
   { title: "onboarding.steps.location.title", body: "onboarding.steps.location.body" },
   { title: "onboarding.steps.timing.title", body: "onboarding.steps.timing.body" },
   { title: "onboarding.steps.living.title", body: "onboarding.steps.living.body" },
+  { title: "onboarding.steps.lifestyle.title", body: "onboarding.steps.lifestyle.body" },
   { title: "onboarding.steps.finish.title", body: "onboarding.steps.finish.body" },
 ] as const;
 
@@ -49,13 +62,15 @@ const STEP_FIELDS: Array<Array<keyof OnboardingFormValues>> = [
   ["areaLabel", "campusId", "lifeStage"],
   ["moveInFrom", "moveInTo", "budgetMin", "budgetMax"],
   ["seeking", "bio"],
+  ["lifestyle"],
   ["language"],
 ];
 
 type WizardErrorKey =
   | "onboarding.photoRequired"
   | "onboarding.saveFailed"
-  | "onboarding.incomplete";
+  | "onboarding.incomplete"
+  | "lifestyle.error.incomplete";
 
 const lifeStageLabelKeys = {
   student: "profile.lifeStage.student",
@@ -75,6 +90,22 @@ const languageLabelKeys = {
   el: "header.languageOption.el",
 } as const;
 
+const archetypeNameKeys = {
+  "night-owl-haven": "lifestyle.archetypes.night-owl-haven.name",
+  "quiet-mornings": "lifestyle.archetypes.quiet-mornings.name",
+  "calm-sanctuary": "lifestyle.archetypes.calm-sanctuary.name",
+  "steady-rhythm": "lifestyle.archetypes.steady-rhythm.name",
+  "open-door": "lifestyle.archetypes.open-door.name",
+} as const satisfies Record<LifestyleArchetype, string>;
+
+// Returns the full envelope only when all ten answers exist, so the wizard can
+// block Continue with per-question highlights (not a raw schema error) and the
+// summary can appear the moment the last question is answered.
+function completeLifestyleEnvelope(answers: Partial<LifestyleAnswers>): LifestyleProfile | null {
+  const parsed = lifestyleAnswersSchema.safeParse(answers);
+  return parsed.success ? { version: LIFESTYLE_VERSION, answers: parsed.data } : null;
+}
+
 function defaultsFor(
   me: MeResponse,
   fallbackLanguage: "en" | "el",
@@ -91,6 +122,8 @@ function defaultsFor(
     campusId: me.profile.campusId,
     language: me.profile.language ?? fallbackLanguage,
     bio: me.profile.bio ?? "",
+    // exactOptionalPropertyTypes: include the key only when answers exist.
+    ...(me.profile.lifestyle ? { lifestyle: me.profile.lifestyle } : {}),
     ageConfirmed: me.profile.ageConfirmed,
   };
 }
@@ -142,6 +175,11 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [step, setStep] = useState(0);
   const [photoUrl, setPhotoUrl] = useState(me.profile.photoUrl);
+  // Held outside react-hook-form like the photo: partial progress must survive
+  // step navigation, and only a complete set is ever written into the form.
+  const [lifestyleAnswers, setLifestyleAnswers] = useState<Partial<LifestyleAnswers>>(
+    me.profile.lifestyle?.answers ?? {},
+  );
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<WizardErrorKey | null>(null);
   const campuses = useQuery({ queryKey: ["campuses"], queryFn: fetchCampuses, retry: false });
@@ -196,6 +234,17 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
       return;
     }
 
+    if (step === LIFESTYLE_STEP) {
+      if (!lifestyleEnvelope) {
+        setErrorKey("lifestyle.error.incomplete");
+        return;
+      }
+
+      // Sync the wizard-held answers into the form so the generic per-step
+      // validation and patch path carries the envelope unchanged.
+      setValue("lifestyle", lifestyleEnvelope);
+    }
+
     const fields = STEP_FIELDS[step] ?? [];
     const valid = await trigger(fields);
 
@@ -218,6 +267,13 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
 
   const finish = async () => {
     setErrorKey(null);
+
+    // Defense in depth: the lifestyle step blocks Continue until complete, but
+    // a stale tab could reach Finish with the form value never set.
+    if (!getValues("lifestyle") && lifestyleEnvelope) {
+      setValue("lifestyle", lifestyleEnvelope);
+    }
+
     const valid = await trigger();
 
     if (!valid) {
@@ -247,6 +303,10 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
   const seeking = values.seeking;
   const showCampus = isCampusLifeStage(lifeStage);
   const bioLength = (values.bio ?? "").trim().length;
+  const lifestyleEnvelope = completeLifestyleEnvelope(lifestyleAnswers);
+  const lifestyleArchetype = values.lifestyle
+    ? deriveLifestyleArchetype(values.lifestyle.answers)
+    : null;
   const copy = STEP_COPY[step] ?? STEP_COPY[0];
 
   return (
@@ -626,7 +686,19 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
             </>
           ) : null}
 
-          {step === 4 ? (
+          {step === LIFESTYLE_STEP ? (
+            <>
+              <LifestyleQuestionnaire
+                idPrefix="onboarding-lifestyle"
+                answers={lifestyleAnswers}
+                onChange={setLifestyleAnswers}
+                showErrors={errorKey === "lifestyle.error.incomplete"}
+              />
+              {lifestyleEnvelope ? <LifestyleSummary profile={lifestyleEnvelope} /> : null}
+            </>
+          ) : null}
+
+          {step === 5 ? (
             <>
               <Controller
                 control={control}
@@ -682,6 +754,12 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
                     <dt className="text-muted-foreground">{t("profile.budget.label")}</dt>
                     <dd className="text-right font-medium">
                       €{values.budgetMin}–€{values.budgetMax}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">{t("profile.lifestyle.title")}</dt>
+                    <dd className="text-right font-medium">
+                      {lifestyleArchetype ? t(archetypeNameKeys[lifestyleArchetype]) : "—"}
                     </dd>
                   </div>
                 </dl>

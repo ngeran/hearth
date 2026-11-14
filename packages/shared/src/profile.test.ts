@@ -8,6 +8,7 @@ import {
   getMissingOnboardingFields,
   isOnboardingComplete,
   type ProfileSnapshot,
+  profileFormSchema,
   profilePatchSchema,
 } from "./profile";
 
@@ -27,6 +28,21 @@ function completeProfile(overrides: Partial<ProfileSnapshot> = {}): ProfileSnaps
     campusId: "campus-nkua",
     language: "en",
     bio: "a".repeat(BIO_MIN_LENGTH),
+    lifestyle: {
+      version: 1,
+      answers: {
+        "social-gatherings": 1,
+        "social-weeknights": 1,
+        "clean-tidy": 1,
+        "clean-shared": 1,
+        "kitchen-cooking": 1,
+        "kitchen-sharing": 1,
+        "quiet-schedule": 1,
+        "quiet-noise": 1,
+        "guests-overnight": 1,
+        "guests-partner": 1,
+      },
+    },
     ageConfirmed: true,
     academicEmail: null,
     academicEmailVerifiedAt: null,
@@ -55,6 +71,7 @@ describe("profile contract", () => {
         seeking: null,
         lifeStage: null,
         bio: null,
+        lifestyle: null,
         ageConfirmed: false,
       }),
     );
@@ -68,8 +85,62 @@ describe("profile contract", () => {
       "seeking",
       "lifeStage",
       "bio",
+      "lifestyle",
       "ageConfirmed",
     ]);
+  });
+
+  it("reports only the lifestyle questionnaire as missing for pre-M2 profiles", () => {
+    expect(getMissingOnboardingFields(completeProfile({ lifestyle: null }))).toEqual(["lifestyle"]);
+  });
+
+  it("accepts a valid lifestyle envelope in patches and rejects partial ones", () => {
+    const { lifestyle } = completeProfile();
+    if (lifestyle === null) {
+      throw new Error("test fixture must include a lifestyle envelope");
+    }
+
+    expect(profilePatchSchema.safeParse({ lifestyle }).success).toBe(true);
+
+    const answersWithoutOne: Record<string, unknown> = { ...lifestyle.answers };
+    delete answersWithoutOne["clean-tidy"];
+
+    expect(
+      profilePatchSchema.safeParse({
+        lifestyle: { version: lifestyle.version, answers: answersWithoutOne },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("profile form stays valid without lifestyle answers", () => {
+    const base = {
+      displayName: "Eleni",
+      areaLabel: "Koukaki, Athens",
+      moveInFrom: "2027-09-01",
+      moveInTo: "2027-10-31",
+      budgetMin: 350,
+      budgetMax: 550,
+      seeking: "room",
+      lifeStage: "student",
+      campusId: null,
+      language: "en",
+      bio: "a".repeat(BIO_MIN_LENGTH),
+      ageConfirmed: true,
+    };
+
+    // Members who have not answered the questionnaire can still save edits.
+    expect(profileFormSchema.safeParse(base).success).toBe(true);
+    expect(
+      profileFormSchema.safeParse({ ...base, lifestyle: completeProfile().lifestyle }).success,
+    ).toBe(true);
+
+    // But a broken envelope must never ride along the profile form either.
+    const answers: Record<string, unknown> = { ...(completeProfile().lifestyle?.answers ?? {}) };
+    delete answers["guests-partner"];
+
+    expect(
+      profileFormSchema.safeParse({ ...base, lifestyle: { version: 1, answers } }).success,
+    ).toBe(false);
   });
 
   it("rejects inverted move-in and budget ranges", () => {
