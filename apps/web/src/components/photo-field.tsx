@@ -89,7 +89,7 @@ export function PhotoField({ id, photoUrl, onChange, disabled = false }: PhotoFi
             className="size-24 rounded-full border object-cover shadow-soft"
           />
         ) : (
-          <span className="flex size-24 items-center justify-center rounded-full border bg-muted text-muted-foreground">
+          <span className="flex size-24 items-center justify-center rounded-full border bg-surface-container-high text-muted-foreground">
             <UserRound aria-hidden="true" className="size-10" />
           </span>
         )}

@@ -33,10 +33,10 @@ export function PlaceholderPage({ kind }: PlaceholderPageProps) {
 
   return (
     <section className="mx-auto max-w-xl py-10 text-center sm:py-16">
-      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-muted text-secondary">
+      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-surface-container-high text-secondary">
         <Icon aria-hidden="true" className="size-7" />
       </span>
-      <h1 className="mt-6 font-serif text-3xl font-semibold tracking-tight">{t(copy.title)}</h1>
+      <h1 className="mt-6 text-display-lg-mobile">{t(copy.title)}</h1>
       <p className="mt-3 text-base text-muted-foreground">{t(copy.body)}</p>
     </section>
   );

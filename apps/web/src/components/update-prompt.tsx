@@ -49,7 +49,7 @@ export function UpdatePrompt() {
       aria-live="polite"
       className="fixed inset-x-4 bottom-24 z-50 mx-auto max-w-md rounded-card border bg-card p-4 text-card-foreground shadow-soft lg:inset-x-auto lg:right-6 lg:bottom-6 lg:mx-0"
     >
-      <h2 className="font-serif text-lg font-semibold">
+      <h2 className="text-title-md">
         {needRefresh ? t("pwa.updateTitle") : t("pwa.offlineReady")}
       </h2>
       {needRefresh ? (

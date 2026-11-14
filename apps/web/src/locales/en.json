@@ -20,14 +20,7 @@
     "languageOption": {
       "en": "English",
       "el": "Greek"
-    },
-    "theme": "Theme",
-    "themeMode": {
-      "system": "System",
-      "light": "Light",
-      "dark": "Dark"
-    },
-    "themeAction": "Switch theme: {{mode}}"
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -63,6 +56,10 @@
     "passkeyAction": "Sign in with a passkey",
     "passkeyBody": "Use your device's fingerprint, face or PIN.",
     "signedInRedirecting": "Signing you in…",
+    "badge": "Hearth · Εστία",
+    "trustTitle": "Calm and private",
+    "trustBody": "One code by email, no passwords, no spam. We never share your email or post anything for you.",
+    "terms": "By continuing you agree to the Terms of Service and the Privacy Policy.",
     "errors": {
       "invalidEmail": "Enter a valid email address.",
       "rateLimited": "Too many attempts. Wait a moment and try again.",

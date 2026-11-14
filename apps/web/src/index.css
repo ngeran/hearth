@@ -1,92 +1,121 @@
 @import "tailwindcss";
-@import "@fontsource-variable/source-serif-4";
 @import "@fontsource-variable/inter";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-  color-scheme: light;
-  --hearth-background: #faf7f2;
-  --hearth-surface: #ffffff;
-  --hearth-foreground: #1f2933;
-  --hearth-card: #ffffff;
-  --hearth-card-foreground: #1f2933;
-  --hearth-popover: #ffffff;
-  --hearth-popover-foreground: #1f2933;
-  --hearth-primary: #c8553d;
-  --hearth-primary-strong: #b44530;
-  --hearth-primary-foreground: #ffffff;
-  --hearth-secondary: #6b8f71;
-  --hearth-secondary-strong: #55755a;
-  --hearth-secondary-foreground: #ffffff;
-  --hearth-accent: #e8a33d;
-  --hearth-accent-foreground: #1f2933;
-  --hearth-muted: #efe9df;
-  --hearth-muted-foreground: #5f6b76;
-  --hearth-border: #e3d9cc;
-  --hearth-input: #d7cbbd;
-  --hearth-ring: #a93e29;
-  --hearth-destructive: #a12c2c;
-  --hearth-destructive-foreground: #ffffff;
-  --hearth-radius: 1.25rem;
-}
-
-.dark {
-  color-scheme: dark;
-  --hearth-background: #14191d;
-  --hearth-surface: #1c2329;
-  --hearth-foreground: #f5efe7;
-  --hearth-card: #1c2329;
-  --hearth-card-foreground: #f5efe7;
-  --hearth-popover: #1c2329;
-  --hearth-popover-foreground: #f5efe7;
-  --hearth-primary: #c8553d;
-  --hearth-primary-strong: #e07a63;
-  --hearth-primary-foreground: #14191d;
-  --hearth-secondary: #6b8f71;
-  --hearth-secondary-strong: #8fb697;
-  --hearth-secondary-foreground: #14191d;
-  --hearth-accent: #f0b35a;
-  --hearth-accent-foreground: #14191d;
-  --hearth-muted: #252e35;
-  --hearth-muted-foreground: #b3bdc6;
-  --hearth-border: #39454e;
-  --hearth-input: #46535d;
-  --hearth-ring: #f0b35a;
-  --hearth-destructive: #e07a63;
-  --hearth-destructive-foreground: #14191d;
-}
-
-@theme inline {
+/*
+ * Hearth is dark-only (OLED night ground). The full palette lives in @theme as literal
+ * values from docs/design/DESIGN.md (YAML tokens). Semantic aliases kept from the M1
+ * markup (background, surface, card, primary, …) sit alongside the Material 3 vocabulary
+ * (surface-container steps, on-surface-variant, outline, containers) so components can
+ * use both without hardcoding hex.
+ */
+@theme {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
 
-  --color-background: var(--hearth-background);
-  --color-foreground: var(--hearth-foreground);
-  --color-surface: var(--hearth-surface);
-  --color-card: var(--hearth-card);
-  --color-card-foreground: var(--hearth-card-foreground);
-  --color-popover: var(--hearth-popover);
-  --color-popover-foreground: var(--hearth-popover-foreground);
-  --color-primary: var(--hearth-primary-strong);
-  --color-primary-brand: var(--hearth-primary);
-  --color-primary-foreground: var(--hearth-primary-foreground);
-  --color-secondary: var(--hearth-secondary-strong);
-  --color-secondary-brand: var(--hearth-secondary);
-  --color-secondary-foreground: var(--hearth-secondary-foreground);
-  --color-accent: var(--hearth-accent);
-  --color-accent-foreground: var(--hearth-accent-foreground);
-  --color-muted: var(--hearth-muted);
-  --color-muted-foreground: var(--hearth-muted-foreground);
-  --color-border: var(--hearth-border);
-  --color-input: var(--hearth-input);
-  --color-ring: var(--hearth-ring);
-  --color-destructive: var(--hearth-destructive);
-  --color-destructive-foreground: var(--hearth-destructive-foreground);
+  /* Inter-only type scale (docs/design/DESIGN.md) */
+  --text-display-lg: 2rem;
+  --text-display-lg--line-height: 2.5rem;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 600;
+  --text-display-lg-mobile: 1.75rem;
+  --text-display-lg-mobile--line-height: 2.25rem;
+  --text-display-lg-mobile--letter-spacing: -0.02em;
+  --text-display-lg-mobile--font-weight: 600;
+  --text-headline-lg: 1.5rem;
+  --text-headline-lg--line-height: 2rem;
+  --text-headline-lg--letter-spacing: -0.015em;
+  --text-headline-lg--font-weight: 600;
+  --text-headline-md: 1.25rem;
+  --text-headline-md--line-height: 1.75rem;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+  --text-title-md: 1.125rem;
+  --text-title-md--line-height: 1.5rem;
+  --text-title-md--font-weight: 600;
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.5rem;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.25rem;
+  --text-body-md--font-weight: 400;
+  --text-label-lg: 0.875rem;
+  --text-label-lg--line-height: 1.25rem;
+  --text-label-lg--letter-spacing: 0.01em;
+  --text-label-lg--font-weight: 500;
+  --text-label-md: 0.75rem;
+  --text-label-md--line-height: 1rem;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-md--font-weight: 500;
+  --text-label-sm: 0.6875rem;
+  --text-label-sm--line-height: 0.875rem;
+  --text-label-sm--letter-spacing: 0.02em;
+  --text-label-sm--font-weight: 500;
 
-  --radius-card: var(--hearth-radius);
-  --radius-control: 0.875rem;
-  --shadow-soft: 0 24px 64px -32px rgb(31 41 51 / 0.28);
+  /* Semantic aliases consumed by existing markup */
+  --color-background: #131315;
+  --color-foreground: #e5e1e4;
+  --color-surface: #131315;
+  --color-card: #201f21;
+  --color-card-foreground: #e5e1e4;
+  --color-popover: #2a2a2c;
+  --color-popover-foreground: #e5e1e4;
+  --color-primary: #ffb4a4;
+  --color-primary-brand: #e76b51;
+  --color-primary-foreground: #640d00;
+  --color-secondary: #a7d0b0;
+  --color-secondary-brand: #a7d0b0;
+  --color-secondary-foreground: #123721;
+  --color-accent: #f9bb61;
+  --color-accent-foreground: #452b00;
+  --color-muted: #1c1b1d;
+  --color-muted-foreground: #dec0b9;
+  --color-border: #57423d;
+  --color-input: #57423d;
+  --color-ring: #e76b51;
+  --color-destructive: #ffb4ab;
+  --color-destructive-foreground: #690005;
+
+  /* Material 3 surface elevation steps */
+  --color-surface-dim: #131315;
+  --color-surface-bright: #39393b;
+  --color-surface-container-lowest: #0e0e10;
+  --color-surface-container-low: #1c1b1d;
+  --color-surface-container: #201f21;
+  --color-surface-container-high: #2a2a2c;
+  --color-surface-container-highest: #353437;
+  --color-surface-variant: #353437;
+  --color-on-surface: #e5e1e4;
+  --color-on-surface-variant: #dec0b9;
+  --color-on-background: #e5e1e4;
+  --color-outline: #a68b85;
+  --color-outline-variant: #57423d;
+
+  /* Primary — terracotta family */
+  --color-on-primary: #640d00;
+  --color-primary-container: #e76b51;
+  --color-on-primary-container: #580a00;
+
+  /* Secondary — sage family */
+  --color-on-secondary: #123721;
+  --color-secondary-container: #2c5138;
+  --color-on-secondary-container: #9ac2a2;
+
+  /* Tertiary — amber family */
+  --color-tertiary: #f9bb61;
+  --color-on-tertiary: #452b00;
+  --color-tertiary-container: #bd8632;
+  --color-on-tertiary-container: #3c2500;
+
+  /* Error family */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  /* Shape and elevation */
+  --radius-card: 1.5rem;
+  --radius-control: 1rem;
+  --shadow-soft: 0 12px 28px -6px rgb(0 0 0 / 0.45);
+  --shadow-glow: 0 8px 24px -4px rgb(226 103 77 / 0.28);
 }
 
 @layer base {
@@ -98,6 +127,7 @@
     min-width: 320px;
     scroll-behavior: smooth;
     background: var(--color-background);
+    color-scheme: dark;
   }
 
   body {

@@ -33,14 +33,14 @@ export function HealthCard() {
     <div
       role="status"
       aria-live="polite"
-      className="rounded-card border bg-card p-4 text-card-foreground shadow-sm"
+      className="rounded-control bg-surface-container-lowest p-4 text-card-foreground"
     >
       <div className="flex items-start gap-3">
         <span
           className={
             healthQuery.isError
-              ? "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-destructive"
-              : "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary-brand/15 text-secondary"
+              ? "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-error/15 text-error"
+              : "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary-container/20 text-secondary"
           }
         >
           {healthQuery.isPending ? (

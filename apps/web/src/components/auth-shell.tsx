@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -25,11 +24,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
           className="flex min-h-11 items-center gap-2 rounded-control"
         >
           <BrandMark className="size-9" />
-          <span className="font-serif text-xl font-semibold tracking-tight">Hearth</span>
+          <span className="text-headline-md">Hearth</span>
         </Link>
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
-          <ThemeToggle />
         </div>
       </header>
 

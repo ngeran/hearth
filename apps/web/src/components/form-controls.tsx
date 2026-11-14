@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const controlClasses =
-  "min-h-11 w-full rounded-control border border-input bg-surface px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-60";
+  "min-h-11 w-full rounded-control border border-outline-variant bg-surface-container-low px-3 py-2 text-sm text-on-surface transition-colors placeholder:text-on-surface-variant focus-visible:border-primary-container disabled:cursor-not-allowed disabled:opacity-60";
 
 export function Field({
   id,
@@ -50,7 +50,7 @@ export function Input({
   return (
     <input
       aria-invalid={invalid || undefined}
-      className={cn(controlClasses, invalid && "border-destructive", className)}
+      className={cn(controlClasses, invalid && "border-error", className)}
       {...props}
     />
   );
@@ -64,12 +64,7 @@ export function Textarea({
   return (
     <textarea
       aria-invalid={invalid || undefined}
-      className={cn(
-        controlClasses,
-        "min-h-32 resize-y",
-        invalid && "border-destructive",
-        className,
-      )}
+      className={cn(controlClasses, "min-h-32 resize-y", invalid && "border-error", className)}
       {...props}
     />
   );
@@ -83,7 +78,7 @@ export function Select({
   return (
     <select
       aria-invalid={invalid || undefined}
-      className={cn(controlClasses, invalid && "border-destructive", className)}
+      className={cn(controlClasses, invalid && "border-error", className)}
       {...props}
     />
   );
@@ -98,7 +93,7 @@ export function Checkbox({
     <input
       type="checkbox"
       aria-invalid={invalid || undefined}
-      className={cn("size-5 rounded border-input accent-primary", className)}
+      className={cn("size-5 rounded border-outline-variant accent-secondary", className)}
       {...props}
     />
   );

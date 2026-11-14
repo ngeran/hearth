@@ -110,10 +110,10 @@ pnpm icons                 # regenerate PWA PNG icons
   and Queue resources as described in `README.md`, then replace the zero UUIDs and the staging origin.
 - The repository is new and has no pre-existing conventions to preserve.
 - `APP_ORIGIN` is non-secret configuration in `wrangler.jsonc`; the rest of the listed values are secrets.
-- The primary development environment is Termux on Android arm64. `workerd` ships no Android binary, so
-  `pnpm test` (Worker project), `pnpm build:worker`, `pnpm dev` and Playwright cannot run locally; CI on
-  `ubuntu-latest` is the authoritative check for those. Shared tests, typecheck, lint and the web build run
-  locally.
+- The primary development environment is NixOS on x86_64 (migrated from Termux on 2026-11-13) and the app
+  deploys to Cloudflare. `workerd` and Playwright run locally, so every workspace script — including
+  `pnpm test`, `pnpm build:worker`, `pnpm dev` and `pnpm test:e2e` — is a local check. CI on `ubuntu-latest`
+  still gates staging deploys.
 - English is the fallback language; Greek is selected automatically for `el-*` browsers and persisted.
 - PWA update prompts are manual and non-blocking, following the calm-technology principle.
 - The Web Push, matching, chat, and admin flows are deliberately absent until their milestones. Auth,

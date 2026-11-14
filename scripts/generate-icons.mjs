@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 
 const outputDirectory = resolve(process.cwd(), "apps/web/public/icons");
-const terracotta = [200, 85, 61, 255];
-const cream = [250, 247, 242, 255];
-const amber = [232, 163, 61, 255];
+const primary = [255, 180, 164, 255]; // #ffb4a4
+const ground = [19, 19, 21, 255]; // #131315
+const amber = [249, 187, 97, 255]; // #f9bb61
 
 const crcTable = new Uint32Array(256);
 for (let index = 0; index < 256; index += 1) {
@@ -141,7 +141,7 @@ function drawIcon(size) {
   const largeSize = size * supersample;
   const pixels = new Uint8Array(largeSize * largeSize * 4);
 
-  fillRect(pixels, largeSize, 0, 0, 1, 1, terracotta);
+  fillRect(pixels, largeSize, 0, 0, 1, 1, primary);
   fillTriangle(
     pixels,
     largeSize,
@@ -150,11 +150,11 @@ function drawIcon(size) {
       [0.5, 0.14],
       [0.84, 0.43],
     ],
-    cream,
+    ground,
   );
-  fillRect(pixels, largeSize, 0.25, 0.38, 0.75, 0.84, cream);
-  fillCircle(pixels, largeSize, 0.5, 0.54, 0.09, terracotta);
-  fillRect(pixels, largeSize, 0.41, 0.54, 0.59, 0.84, terracotta);
+  fillRect(pixels, largeSize, 0.25, 0.38, 0.75, 0.84, ground);
+  fillCircle(pixels, largeSize, 0.5, 0.54, 0.09, primary);
+  fillRect(pixels, largeSize, 0.41, 0.54, 0.59, 0.84, primary);
   fillCircle(pixels, largeSize, 0.5, 0.64, 0.028, amber);
   fillTriangle(
     pixels,

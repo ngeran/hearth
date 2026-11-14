@@ -6,7 +6,6 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { OfflinePage } from "@/components/offline-page";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { UpdatePrompt } from "@/components/update-prompt";
 import { useSession } from "@/lib/auth-client";
 import { useMe } from "@/lib/use-me";
@@ -54,7 +53,7 @@ export function AppShell() {
             className="flex min-h-11 items-center gap-3 rounded-control px-2"
           >
             <BrandMark />
-            <span className="font-serif text-2xl font-semibold tracking-tight">Hearth</span>
+            <span className="text-headline-lg">Hearth</span>
           </Link>
 
           <nav aria-label={t("nav.label")} className="mt-8">
@@ -70,8 +69,8 @@ export function AppShell() {
                         cn(
                           "flex min-h-11 items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-muted text-foreground"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            ? "bg-surface-container-high text-primary"
+                            : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
                         )
                       }
                     >
@@ -87,9 +86,9 @@ export function AppShell() {
           <div className="mt-auto space-y-4">
             <Link
               to={signedIn ? "/profile" : "/sign-in"}
-              className="flex min-h-11 items-center gap-3 rounded-control border bg-card px-3 py-2 text-sm transition-colors hover:bg-muted"
+              className="flex min-h-11 items-center gap-3 rounded-control border bg-card px-3 py-2 text-sm transition-colors hover:bg-surface-container-high"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-secondary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-secondary">
                 {signedIn ? (
                   <UserRound aria-hidden="true" className="size-5" />
                 ) : (
@@ -109,14 +108,13 @@ export function AppShell() {
             </Link>
             <div className="flex items-center gap-2">
               <LanguageSwitcher />
-              <ThemeToggle />
             </div>
             <p className="px-1 text-xs text-muted-foreground">{copyright}</p>
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur lg:hidden">
+          <header className="sticky top-0 z-30 border-b bg-surface/85 backdrop-blur-xl lg:hidden">
             <div className="flex h-16 items-center justify-between gap-3 px-4">
               <Link
                 to="/"
@@ -124,15 +122,14 @@ export function AppShell() {
                 className="flex min-h-11 items-center gap-2 rounded-control"
               >
                 <BrandMark className="size-8" />
-                <span className="font-serif text-xl font-semibold tracking-tight">Hearth</span>
+                <span className="text-headline-md">Hearth</span>
               </Link>
               <div className="flex items-center gap-1">
                 <LanguageSwitcher />
-                <ThemeToggle />
                 <Link
                   to={signedIn ? "/profile" : "/sign-in"}
                   aria-label={signedIn ? t("nav.account") : t("nav.signIn")}
-                  className="flex size-11 items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="flex size-11 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
                 >
                   {signedIn ? (
                     <UserRound aria-hidden="true" className="size-5" />
@@ -159,7 +156,7 @@ export function AppShell() {
 
       <nav
         aria-label={t("nav.label")}
-        className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
         <div className="mx-auto grid max-w-md grid-cols-3 gap-1 px-2 py-2">
           {navItems.map((item) => {
@@ -172,9 +169,7 @@ export function AppShell() {
                 className={({ isActive }) =>
                   cn(
                     "flex min-h-14 flex-col items-center justify-center gap-1 rounded-control px-2 text-xs font-medium transition-colors",
-                    isActive
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    isActive ? "text-primary" : "text-on-surface-variant hover:text-on-surface",
                   )
                 }
               >

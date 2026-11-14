@@ -5,15 +5,18 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-control text-sm font-semibold whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-control text-sm font-semibold whitespace-nowrap transition-[color,background-color,border-color,transform] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-border bg-surface text-foreground hover:bg-muted",
-        ghost: "text-foreground hover:bg-muted",
+        default:
+          "bg-primary-container text-on-primary-container shadow-glow hover:bg-primary-container/90 active:scale-[0.98]",
+        secondary:
+          "bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:scale-[0.98]",
+        destructive: "bg-error-container text-on-error-container hover:bg-error-container/90",
+        outline:
+          "border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container",
+        ghost: "text-on-surface hover:bg-surface-container-high",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

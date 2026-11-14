@@ -4,11 +4,8 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "@/app";
 import "@/lib/i18n";
-import { initTheme } from "@/lib/theme";
 
 import "./index.css";
-
-initTheme();
 
 const queryClient = new QueryClient({
   defaultOptions: {

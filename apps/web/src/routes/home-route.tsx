@@ -32,7 +32,7 @@ export function HomeRoute() {
           <p className="inline-flex rounded-full border border-secondary-brand/30 bg-secondary-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-secondary uppercase">
             {t("home.eyebrow")}
           </p>
-          <h1 className="mt-5 max-w-3xl font-serif text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl">
+          <h1 className="mt-5 max-w-3xl text-display-lg-mobile text-balance sm:text-display-lg">
             {t("home.title")}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
@@ -40,7 +40,11 @@ export function HomeRoute() {
           </p>
         </div>
 
-        <div className="rounded-card border bg-card p-4 text-card-foreground shadow-soft">
+        <div className="relative overflow-hidden rounded-card border bg-card p-4 text-card-foreground shadow-soft">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full bg-primary-container/10 blur-3xl"
+          />
           <HomeIllustration />
           <div className="mt-3">
             <HealthCard />
@@ -49,7 +53,7 @@ export function HomeRoute() {
       </section>
 
       <section aria-labelledby="values-heading" className="mt-14">
-        <h2 id="values-heading" className="font-serif text-2xl font-semibold tracking-tight">
+        <h2 id="values-heading" className="text-headline-lg">
           {t("home.values.label")}
         </h2>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -57,11 +61,11 @@ export function HomeRoute() {
             const Icon = value.icon;
 
             return (
-              <article key={value.title} className="rounded-card border bg-surface p-5">
-                <span className="flex size-11 items-center justify-center rounded-full bg-muted text-secondary">
+              <article key={value.title} className="rounded-card border bg-card p-5">
+                <span className="flex size-11 items-center justify-center rounded-full bg-surface-container-high text-secondary">
                   <Icon aria-hidden="true" className="size-5" />
                 </span>
-                <h3 className="mt-4 font-serif text-xl font-semibold">{t(value.title)}</h3>
+                <h3 className="mt-4 text-headline-md">{t(value.title)}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {t(value.body)}
                 </p>

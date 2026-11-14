@@ -1,4 +1,4 @@
-import { KeyRound, Mail } from "lucide-react";
+import { Flame, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -181,15 +181,30 @@ export function SignInRoute() {
 
   return (
     <AuthShell>
+      {step === "email" ? (
+        <div className="mb-6 flex flex-col items-center text-center">
+          <div
+            aria-hidden="true"
+            className="flex size-24 items-center justify-center rounded-full border border-outline-variant/60"
+          >
+            <div className="flex size-16 items-center justify-center rounded-full bg-surface-container-high">
+              <Flame className="size-7 text-primary" />
+            </div>
+          </div>
+          <span className="mt-4 inline-flex items-center rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-label-md text-on-surface-variant">
+            {t("auth.badge")}
+          </span>
+        </div>
+      ) : null}
       <section className="rounded-card border bg-card p-6 text-card-foreground shadow-soft sm:p-8">
-        <span className="flex size-12 items-center justify-center rounded-full bg-muted text-primary">
+        <span className="flex size-12 items-center justify-center rounded-full bg-surface-container-high text-primary">
           {step === "email" ? (
             <Mail aria-hidden="true" className="size-6" />
           ) : (
             <KeyRound aria-hidden="true" className="size-6" />
           )}
         </span>
-        <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-balance">
+        <h1 className="mt-4 text-display-lg-mobile text-balance">
           {step === "email" ? t("auth.title") : t("auth.codeTitle")}
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -199,7 +214,7 @@ export function SignInRoute() {
         {errorKey ? (
           <p
             role="alert"
-            className="mt-5 rounded-control border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+            className="mt-5 rounded-control border border-error/40 bg-error/10 px-3 py-2 text-sm font-medium text-error"
           >
             {t(errorKey)}
           </p>
@@ -286,10 +301,10 @@ export function SignInRoute() {
 
         {passkeySupported ? (
           <>
-            <div className="my-6 flex items-center gap-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              <span className="h-px flex-1 bg-border" />
+            <div className="my-6 flex items-center gap-3 text-xs font-medium tracking-wide text-on-surface-variant uppercase">
+              <span className="h-px flex-1 bg-outline-variant" />
               {t("auth.or")}
-              <span className="h-px flex-1 bg-border" />
+              <span className="h-px flex-1 bg-outline-variant" />
             </div>
             <Button
               type="button"
@@ -301,12 +316,26 @@ export function SignInRoute() {
               <KeyRound aria-hidden="true" className="size-4" />
               {t("auth.passkeyAction")}
             </Button>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">
               {t("auth.passkeyBody")}
             </p>
           </>
         ) : null}
       </section>
+
+      <section className="mt-5 flex gap-3 rounded-card border bg-surface-container-low p-5 text-card-foreground">
+        <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-secondary" />
+        <div>
+          <h2 className="text-title-md">{t("auth.trustTitle")}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
+            {t("auth.trustBody")}
+          </p>
+        </div>
+      </section>
+
+      <p className="mt-6 text-center text-xs leading-relaxed text-on-surface-variant">
+        {t("auth.terms")}
+      </p>
     </AuthShell>
   );
 }

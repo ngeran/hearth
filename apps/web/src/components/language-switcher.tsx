@@ -34,7 +34,7 @@ export function LanguageSwitcher() {
         id={selectId}
         value={currentLanguage}
         onChange={(event) => handleChange(event.target.value)}
-        className="h-11 w-32 appearance-none rounded-control border border-border bg-surface py-2 pr-8 pl-9 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+        className="h-11 w-32 appearance-none rounded-full border border-outline-variant bg-surface-container py-2 pr-8 pl-9 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container-high"
       >
         <option value="en">{t("header.languageOption.en")}</option>
         <option value="el">{t("header.languageOption.el")}</option>

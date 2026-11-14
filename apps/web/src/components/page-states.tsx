@@ -28,7 +28,7 @@ export function PageError({
 }) {
   return (
     <div role="alert" className="rounded-card border bg-card p-6 shadow-soft">
-      <h2 className="font-serif text-2xl font-semibold">{title}</h2>
+      <h2 className="text-headline-lg">{title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
       <Button type="button" className="mt-5" onClick={onAction}>
         {actionLabel}

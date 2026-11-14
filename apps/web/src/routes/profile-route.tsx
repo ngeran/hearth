@@ -24,6 +24,7 @@ import {
   Plus,
   ShieldCheck,
   Trash2,
+  TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -252,7 +253,7 @@ function ProfileContent({ me }: { me: MeResponse }) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("profile.title")}</h1>
+        <h1 className="text-display-lg-mobile">{t("profile.title")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("profile.body")}</p>
       </header>
 
@@ -271,8 +272,8 @@ function ProfileContent({ me }: { me: MeResponse }) {
         </div>
       ) : null}
 
-      <section className="rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
-        <h2 className="font-serif text-xl font-semibold">{t("profile.photo.sectionTitle")}</h2>
+      <section className="rounded-card border bg-surface-container-low p-5 text-card-foreground shadow-soft sm:p-6">
+        <h2 className="text-headline-md">{t("profile.photo.sectionTitle")}</h2>
         <div className="mt-4">
           <PhotoField
             id="profile-photo"
@@ -290,7 +291,7 @@ function ProfileContent({ me }: { me: MeResponse }) {
         onSubmit={(event) => void handleSubmit(onSubmit)(event)}
         noValidate
       >
-        <h2 className="font-serif text-xl font-semibold">{t("profile.detailsTitle")}</h2>
+        <h2 className="text-headline-md">{t("profile.detailsTitle")}</h2>
 
         {saveState === "saved" ? (
           <p role="status" className="flex items-center gap-2 text-sm font-medium text-secondary">
@@ -573,7 +574,7 @@ function ProfileContent({ me }: { me: MeResponse }) {
       />
 
       <section className="space-y-4 rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
-        <h2 className="font-serif text-xl font-semibold">{t("profile.data.title")}</h2>
+        <h2 className="text-headline-md">{t("profile.data.title")}</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{t("profile.data.body")}</p>
         {dataMessage ? (
           <p role="status" className="text-sm font-medium text-secondary">
@@ -597,10 +598,13 @@ function ProfileContent({ me }: { me: MeResponse }) {
         </div>
       </section>
 
-      <section className="space-y-3 rounded-card border border-destructive/40 bg-card p-5 text-card-foreground shadow-soft sm:p-6">
-        <h2 className="font-serif text-xl font-semibold text-destructive">
-          {t("profile.delete.title")}
-        </h2>
+      <section className="space-y-3 rounded-card border border-error/30 bg-surface-container-lowest p-5 text-card-foreground shadow-soft sm:p-6">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-error/10 text-error">
+            <TriangleAlert aria-hidden="true" className="size-5" />
+          </span>
+          <h2 className="text-headline-md text-error">{t("profile.delete.title")}</h2>
+        </div>
         <p className="text-sm leading-relaxed text-muted-foreground">{t("profile.delete.body")}</p>
         <Field
           id="profile-delete-confirm"
@@ -706,11 +710,11 @@ function AcademicEmailCard({ me }: { me: MeResponse }) {
   return (
     <section className="space-y-4 rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
       <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-secondary">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-secondary">
           <MailCheck aria-hidden="true" className="size-5" />
         </span>
         <div>
-          <h2 className="font-serif text-xl font-semibold">{t("profile.academic.title")}</h2>
+          <h2 className="text-headline-md">{t("profile.academic.title")}</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             {t("profile.academic.body")}
           </p>
@@ -718,7 +722,7 @@ function AcademicEmailCard({ me }: { me: MeResponse }) {
       </div>
 
       {verifiedAt && verifiedEmail ? (
-        <p className="flex items-center gap-2 text-sm font-medium text-secondary">
+        <p className="inline-flex items-center gap-2 self-start rounded-full bg-secondary-container/20 px-3 py-1.5 text-sm font-medium text-secondary">
           <ShieldCheck aria-hidden="true" className="size-4" />
           {t("profile.academic.verified", { email: verifiedEmail })}
         </p>
@@ -837,11 +841,11 @@ function PasskeysCard({
   return (
     <section className="space-y-4 rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
       <div className="flex items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-secondary">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-secondary">
           <KeyRound aria-hidden="true" className="size-5" />
         </span>
         <div>
-          <h2 className="font-serif text-xl font-semibold">{t("profile.passkeys.title")}</h2>
+          <h2 className="text-headline-md">{t("profile.passkeys.title")}</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             {t("profile.passkeys.body")}
           </p>
@@ -868,7 +872,7 @@ function PasskeysCard({
               {passkeys.data.map((passkey) => (
                 <li
                   key={passkey.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-control border bg-surface px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-surface-container-lowest px-3 py-2"
                 >
                   <span className="text-sm font-medium">
                     {passkey.name || t("profile.passkeys.defaultName")}

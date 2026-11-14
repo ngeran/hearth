@@ -28,8 +28,12 @@ import { Button } from "@/components/ui/button";
 import { LANGUAGE_STORAGE_KEY, normalizeLanguage } from "@/lib/i18n";
 import { fetchCampuses, updateMe } from "@/lib/me";
 import { useMe } from "@/lib/use-me";
+import { cn } from "@/lib/utils";
 
 const STEP_COUNT = 5;
+
+// Static segment numbers for the progress indicator; the list never reorders.
+const PROGRESS_SEGMENTS = Array.from({ length: STEP_COUNT }, (_, index) => index + 1);
 
 const STEP_COPY = [
   { title: "onboarding.steps.about.title", body: "onboarding.steps.about.body" },
@@ -240,16 +244,23 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
         <p className="text-xs font-semibold tracking-wide text-secondary uppercase">
           {t("onboarding.eyebrow")}
         </p>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-[width]"
-            style={{ width: `${((step + 1) / STEP_COUNT) * 100}%` }}
-            role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={STEP_COUNT}
-            aria-valuenow={step + 1}
-            aria-label={t("onboarding.progress", { current: step + 1, total: STEP_COUNT })}
-          />
+        <div
+          className="mt-3 flex gap-1.5"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={STEP_COUNT}
+          aria-valuenow={step + 1}
+          aria-label={t("onboarding.progress", { current: step + 1, total: STEP_COUNT })}
+        >
+          {PROGRESS_SEGMENTS.map((segment) => (
+            <span
+              key={segment}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-colors",
+                segment <= step + 1 ? "bg-primary" : "bg-surface-container-highest",
+              )}
+            />
+          ))}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
           {t("onboarding.progress", { current: step + 1, total: STEP_COUNT })}
@@ -258,7 +269,7 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="mt-5 font-serif text-3xl font-semibold tracking-tight text-balance outline-none"
+          className="mt-5 text-display-lg-mobile text-balance outline-none"
         >
           {t(copy.title)}
         </h1>
@@ -267,7 +278,7 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
         {errorKey ? (
           <p
             role="alert"
-            className="mt-5 rounded-control border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+            className="mt-5 rounded-control border border-error/40 bg-error/10 px-3 py-2 text-sm font-medium text-error"
           >
             {t(errorKey)}
           </p>
@@ -382,28 +393,62 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
                 control={control}
                 name="lifeStage"
                 render={({ field }) => (
-                  <Field
-                    id="onboarding-life-stage"
-                    label={t("profile.lifeStage.label")}
-                    error={errors.lifeStage ? t("validation.checkField") : undefined}
-                  >
-                    <Select
-                      id="onboarding-life-stage"
-                      value={field.value ?? ""}
-                      onChange={(event) =>
-                        field.onChange(event.target.value === "" ? undefined : event.target.value)
-                      }
-                      aria-describedby="onboarding-life-stage-error"
-                      invalid={Boolean(errors.lifeStage)}
-                    >
-                      <option value="">{t("validation.choose")}</option>
-                      {LIFE_STAGES.map((stage) => (
-                        <option key={stage} value={stage}>
-                          {t(lifeStageLabelKeys[stage])}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
+                  <fieldset>
+                    <legend className="text-sm font-medium text-foreground">
+                      {t("profile.lifeStage.label")}
+                    </legend>
+                    {errors.lifeStage ? (
+                      <p
+                        id="onboarding-life-stage-error"
+                        role="alert"
+                        className="mt-1 text-sm text-error"
+                      >
+                        {t("validation.checkField")}
+                      </p>
+                    ) : null}
+                    <div className="mt-2 grid gap-2">
+                      {LIFE_STAGES.map((stage) => {
+                        const active = field.value === stage;
+
+                        return (
+                          <label
+                            key={stage}
+                            className={cn(
+                              "flex min-h-11 cursor-pointer items-center gap-3 rounded-control border px-4 py-3 text-sm transition-colors has-[:focus-visible]:border-primary-container",
+                              active
+                                ? "border-transparent bg-surface-container-highest text-on-surface"
+                                : "border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container",
+                            )}
+                          >
+                            <input
+                              type="radio"
+                              name="onboarding-life-stage"
+                              value={stage}
+                              checked={active}
+                              onChange={() => field.onChange(stage)}
+                              aria-invalid={Boolean(errors.lifeStage)}
+                              aria-describedby={
+                                errors.lifeStage ? "onboarding-life-stage-error" : undefined
+                              }
+                              className="sr-only"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "flex size-5 shrink-0 items-center justify-center rounded-full border",
+                                active ? "border-secondary" : "border-outline-variant",
+                              )}
+                            >
+                              {active ? (
+                                <span className="size-2.5 rounded-full bg-secondary" />
+                              ) : null}
+                            </span>
+                            <span>{t(lifeStageLabelKeys[stage])}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                 )}
               />
             </>
@@ -487,29 +532,63 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
                 control={control}
                 name="seeking"
                 render={({ field }) => (
-                  <Field
-                    id="onboarding-seeking"
-                    label={t("profile.seeking.label")}
-                    hint={t("profile.seeking.hint")}
-                    error={errors.seeking ? t("validation.checkField") : undefined}
-                  >
-                    <Select
-                      id="onboarding-seeking"
-                      value={field.value ?? ""}
-                      onChange={(event) =>
-                        field.onChange(event.target.value === "" ? undefined : event.target.value)
-                      }
-                      aria-describedby="onboarding-seeking-hint onboarding-seeking-error"
-                      invalid={Boolean(errors.seeking)}
-                    >
-                      <option value="">{t("validation.choose")}</option>
-                      {SEEKING_TYPES.map((option) => (
-                        <option key={option} value={option}>
-                          {t(seekingLabelKeys[option])}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
+                  <fieldset>
+                    <legend className="text-sm font-medium text-foreground">
+                      {t("profile.seeking.label")}
+                    </legend>
+                    <p id="onboarding-seeking-hint" className="mt-1 text-xs text-muted-foreground">
+                      {t("profile.seeking.hint")}
+                    </p>
+                    {errors.seeking ? (
+                      <p
+                        id="onboarding-seeking-error"
+                        role="alert"
+                        className="mt-1 text-sm text-error"
+                      >
+                        {t("validation.checkField")}
+                      </p>
+                    ) : null}
+                    <div className="mt-2 grid gap-2">
+                      {SEEKING_TYPES.map((option) => {
+                        const active = field.value === option;
+
+                        return (
+                          <label
+                            key={option}
+                            className={cn(
+                              "flex min-h-11 cursor-pointer items-center gap-3 rounded-control border px-4 py-3 text-sm transition-colors has-[:focus-visible]:border-primary-container",
+                              active
+                                ? "border-transparent bg-surface-container-highest text-on-surface"
+                                : "border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container",
+                            )}
+                          >
+                            <input
+                              type="radio"
+                              name="onboarding-seeking"
+                              value={option}
+                              checked={active}
+                              onChange={() => field.onChange(option)}
+                              aria-invalid={Boolean(errors.seeking)}
+                              aria-describedby="onboarding-seeking-hint onboarding-seeking-error"
+                              className="sr-only"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "flex size-5 shrink-0 items-center justify-center rounded-full border",
+                                active ? "border-secondary" : "border-outline-variant",
+                              )}
+                            >
+                              {active ? (
+                                <span className="size-2.5 rounded-full bg-secondary" />
+                              ) : null}
+                            </span>
+                            <span>{t(seekingLabelKeys[option])}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                 )}
               />
               <Field
@@ -561,8 +640,8 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
                   </Field>
                 )}
               />
-              <div className="rounded-control border bg-surface p-4">
-                <h2 className="font-serif text-xl font-semibold">{t("onboarding.review.title")}</h2>
+              <div className="rounded-control border bg-surface-container-lowest p-4">
+                <h2 className="text-headline-md">{t("onboarding.review.title")}</h2>
                 <dl className="mt-3 space-y-2 text-sm">
                   <div className="flex justify-between gap-4">
                     <dt className="text-muted-foreground">{t("profile.displayName.label")}</dt>
@@ -595,7 +674,7 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
             </>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-control bg-surface-container/90 p-2 backdrop-blur">
             <Button
               type="button"
               variant="ghost"
