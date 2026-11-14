@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 const timestamp = (name: string) => integer(name, { mode: "timestamp" });
 const boolean = (name: string) => integer(name, { mode: "boolean" });
@@ -175,6 +183,27 @@ export const academicVerifications = sqliteTable(
     uniqueIndex("idx_academic_verifications_active")
       .on(table.userId)
       .where(sql`consumed_at IS NULL`),
+  ],
+);
+
+// M4 chat thread metadata. Message bodies live only inside the ChatRoom
+// Durable Object; this table exists for ordered thread discovery. The
+// composite PK mirrors the deterministic chatThreadId used for idFromName.
+export const chatThreads = sqliteTable(
+  "chat_threads",
+  {
+    userLow: text("user_low")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    userHigh: text("user_high")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userLow, table.userHigh] }),
+    index("idx_chat_threads_high_updated").on(table.userHigh, table.updatedAt),
   ],
 );
 

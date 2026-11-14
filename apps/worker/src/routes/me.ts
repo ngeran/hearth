@@ -7,6 +7,7 @@ import {
   academicEmailRequestSchema,
   academicEmailVerifySchema,
   academicVerificationResponseSchema,
+  chatThreadId,
   deleteAccountSchema,
   exportResponseSchema,
   ImageValidationError,
@@ -15,7 +16,7 @@ import {
   profilePatchSchema,
   sanitizeImage,
 } from "@hearth/shared";
-import { and, desc, eq, gt, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createDb, type Db } from "../db/client";
@@ -23,6 +24,7 @@ import {
   academicVerifications,
   account,
   auditLog,
+  chatThreads,
   passkey,
   profiles,
   session,
@@ -508,6 +510,23 @@ me.delete("/", async (c) => {
 
   if (profile?.photoKey) {
     await c.env.PHOTOS.delete(profile.photoKey);
+  }
+
+  // Purge every conversation body from the ChatRoom Durable Objects before
+  // the D1 cleanup removes the thread rows (the FK cascade only drops
+  // metadata). Bodies live solely inside the DOs, so deletion must reach
+  // each one individually.
+  const threads = await db
+    .select()
+    .from(chatThreads)
+    .where(or(eq(chatThreads.userLow, id), eq(chatThreads.userHigh, id)));
+  for (const thread of threads) {
+    const peerId = thread.userLow === id ? thread.userHigh : thread.userLow;
+    const stub = c.env.CHAT.get(c.env.CHAT.idFromName(chatThreadId(id, peerId)));
+    await stub.fetch("https://chat-room/purge", {
+      method: "POST",
+      headers: { "x-hearth-user-id": id, "x-hearth-peer-id": peerId },
+    });
   }
 
   const otpIdentifiers = [

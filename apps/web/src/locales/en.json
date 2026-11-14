@@ -265,20 +265,6 @@
     "retry": "Check again",
     "lastChecked": "Checked at {{time}}"
   },
-  "placeholder": {
-    "matches": {
-      "title": "Matches",
-      "body": "Your first matches will appear here in a later update. Until then, the space is yours."
-    },
-    "messages": {
-      "title": "Messages",
-      "body": "When you and someone both agree to talk, your conversation will live here."
-    },
-    "profile": {
-      "title": "Profile",
-      "body": "Tell Hearth how you live and what matters to you. You stay in control of what is visible."
-    }
-  },
   "lifestyle": {
     "dimensions": {
       "social-rhythm": "Social rhythm",
@@ -433,6 +419,7 @@
     },
     "report": {
       "title": "Why you two might work",
+      "sayHi": "Say hi",
       "you": "You",
       "area": "Area",
       "budget": "Budget",
@@ -442,6 +429,37 @@
       "differ": "You differ",
       "sharedHeading": "Where you align",
       "differHeading": "Where you differ"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "empty": {
+      "title": "No conversations yet",
+      "body": "When you say hi to someone from your matches, your conversation lives here.",
+      "action": "Browse matches"
+    },
+    "open": "Chat with {{name}}",
+    "unread": "Unread messages",
+    "conversation": {
+      "emptyTitle": "No messages yet",
+      "emptyBody": "Whoever writes first opens the conversation."
+    },
+    "composer": {
+      "placeholder": "Write a message…",
+      "send": "Send",
+      "sending": "Sending…",
+      "sendFailed": "Didn't send. Try again.",
+      "counter_one": "{{count}} character left",
+      "counter_other": "{{count}} characters left"
+    },
+    "time": {
+      "now": "Just now",
+      "minutesAgo_one": "1 minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo_one": "1 hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "daysAgo_one": "1 day ago",
+      "daysAgo_other": "{{count}} days ago"
     }
   },
   "offline": {

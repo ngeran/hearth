@@ -9,6 +9,7 @@ import {
 } from "@hearth/shared";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -75,6 +76,7 @@ export function CompatibilityReport({
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "en";
+  const navigate = useNavigate();
   const Heading = heading;
 
   return (
@@ -94,6 +96,14 @@ export function CompatibilityReport({
           </Button>
         ) : null}
       </div>
+
+      <Button
+        type="button"
+        className="mt-4"
+        onClick={() => navigate(`/messages?with=${encodeURIComponent(match.userId)}`)}
+      >
+        {t("matches.report.sayHi")}
+      </Button>
 
       <div className="mt-4 flex items-center gap-4">
         <p className="text-display-lg-mobile font-bold tabular-nums sm:text-display-lg">

@@ -1,5 +1,6 @@
 export * from "./api";
 export * from "./campus";
+export * from "./chat";
 export * from "./constants";
 export * from "./health";
 export * from "./image";

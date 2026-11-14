@@ -1,7 +1,7 @@
 # PLAN — M4 1:1 chat
 
 Spec: `docs/specs/M4.md` (owner review of the chat model, polling decision, privacy pass and
-Greek copy pending — build starts only after approval). The spec is canonical for content and
+Greek copy — **approved 2026-11-14**, including the export gap). The spec is canonical for content and
 product behavior; this file is the build checklist. The M3 plan that lived here previously is
 complete (8/8, shipped in `0f663f0`, seeds live on staging).
 
@@ -51,7 +51,7 @@ complete (8/8, shipped in `0f663f0`, seeds live on staging).
 
 Run the local gate after every step; tick only when it passes. Fix failures before moving on.
 
-1. [ ] **Shared chat module** — `packages/shared/src/chat.ts` + `chat.test.ts`:
+1. [x] **Shared chat module** — `packages/shared/src/chat.ts` + `chat.test.ts`:
    `messageBodySchema` (1–1000 after trim, no control chars), `chatMessageSchema`
    (`{seq, author, body, sentAt}`), `chatMessagesResponseSchema`, `threadListItemSchema`
    (peer summary + lastMessage preview + unread), `chatsResponseSchema`, `sendMessageRequestSchema`,
@@ -59,38 +59,74 @@ Run the local gate after every step; tick only when it passes. Fix failures befo
    body edges (empty/trim/1001/control chars), id sorting determinism + symmetry. Export from the
    shared index. Verify: `pnpm --filter @hearth/shared test && pnpm --filter @hearth/shared
     typecheck`.
-2. [ ] **Migration** — `migrations/0004_chat_threads.sql` (`chat_threads` composite PK
+   Status: done 2026-11-14. Thread item shipped as `chatThreadSchema`/`ChatThread`; also added
+   `startChatRequestSchema` ({peerId}). Newlines allowed, all other C0/C1 controls rejected.
+   18 new tests (87 shared total) + shared typecheck green; exported from index alphabetically.
+2. [x] **Migration** — `migrations/0004_chat_threads.sql` (`chat_threads` composite PK
    `user_low`/`user_high`, FKs cascade, `created_at`/`updated_at`, index on `user_high,
    updated_at`); drizzle table in `apps/worker/src/db/schema.ts`. Verify: a `node:sqlite` one-off
    in `/tmp/opencode` applies 0000→0004 to a fresh DB and proves the FK cascade deletes thread
    rows when a user row goes.
-3. [ ] **ChatRoom DO** — implement `apps/worker/src/chat-room.ts` (constructor takes `State`;
+   Status: done 2026-11-14. Proof (m4-migration-proof.mjs) surfaced that the composite PK alone
+   accepts the reversed pair — added `CHECK (user_low < user_high)` so mis-ordered inserts are
+   rejected at the DB level. Cascade + duplicate + index assertions pass; worker typecheck + 4
+   existing tests green (migrations apply in the vitest D1).
+3. [x] **ChatRoom DO** — implement `apps/worker/src/chat-room.ts` (constructor takes `State`;
    `meta`/`seq`/`last` handling; `POST /send` with cooldown; `GET /list?after=&limit=50`;
    `GET /state`; `POST /read`; `POST /purge`; identity from `x-hearth-user-id`, members-only
    access; shared envelope replies; no logging of bodies). Add `CHAT` binding + `migrations`
    `new_sqlite_classes` to `apps/worker/wrangler.test.jsonc`. New
    `apps/worker/test/chat.test.ts`: send → list order → read marker → unread → cooldown → purge,
    through the real namespace. Verify: `pnpm --filter @hearth/worker test`.
-4. [ ] **Worker routes + deletion purge** — `apps/worker/src/routes/chats.ts` (`GET /chats` list
+   Status: done 2026-11-14. Meta lazily initialised from the first contacting pair
+   (`x-hearth-user-id` + `x-hearth-peer-id`, both required); replies parsed with shared schemas
+   (chatMessage/chatMessagesResponse/sendMessageRequest) + local zod for the read marker. Two
+   test-design bugs fixed en route (same-sender cooldown; outsider must hit the SAME DO with a
+   forged header). 13 worker tests green.
+4. [x] **Worker routes + deletion purge** — `apps/worker/src/routes/chats.ts` (`GET /chats` list
    with per-thread DO `state` fan-in + peer summaries, `POST /chats` eligibility recompute +
    idempotent upsert, `GET/POST /chats/:peerId/messages` forwarding; 403 for incomplete caller /
    ineligible peer; 404 when no thread) + mount in `index.ts` + `routes/me.ts` deletion gains the
    DO purge step before D1 cleanup. Verify: `pnpm --filter @hearth/worker typecheck` + full gate.
-5. [ ] **Web data + locales** — `apps/web/src/lib/chats.ts` (`fetchChats`, `startChat`,
+   Status: done 2026-11-14. List capped at 50 threads (desc updated_at), preview truncated at 80
+   chars; GET messages marks the thread read after a successful fetch; DO error envelopes relayed
+   verbatim (400/403/404/429); deletion purges each DO before D1 rows fall to the FK cascade;
+   `startAfter` built conditionally for exactOptionalPropertyTypes. Typecheck + 13 worker tests +
+   build (dry-run resolves the CHAT binding) green.
+5. [x] **Web data + locales** — `apps/web/src/lib/chats.ts` (`fetchChats`, `startChat`,
    `fetchThreadMessages`, `sendThreadMessage` — raw fetch + shared schemas) + `use-chats.ts`
    (threads query; messages query with `refetchInterval: 5000` gated on visibility; send
    mutation with cache update). Locale keys at parity: `messages.*` block (titles, empty states,
    composer, send, unread a11y, relative time) + `matches.report.sayHi`. Verify:
    `pnpm check:i18n && pnpm --filter @hearth/web typecheck`.
-6. [ ] **Messages UI** — new `messages-route.tsx` (thread list + conversation + composer; mobile
+   Status: done 2026-11-14 — added shared `startChatResponseSchema` (+1 test, both sides parse
+   the POST /chats reply); messages query polls the after=0 tail window; send invalidates the
+   whole `["chats"]` tree. Locales: 21 new keys (plural `_one`/`_other` relative-time forms);
+   check:i18n 318 keys parity; full gate green (88 shared + 13 worker tests). Biome needed a
+   justified ignore for the deliberate control-character reject regex.
+6. [x] **Messages UI** — new `messages-route.tsx` (thread list + conversation + composer; mobile
    single-pane swap, `lg:` two-pane; unread dots; send states; empty/loading/error; `/messages?
-   with=<userId>` creates/focuses the thread); `compatibility-report.tsx` gains the Say hi button;
+    with=<userId>` creates/focuses the thread); `compatibility-report.tsx` gains the Say hi button;
    `router.tsx`: replace the placeholder with `RequireAuth` + `MessagesRoute`. Verify: full gate.
-7. [ ] **e2e stays green** — run `pnpm test:e2e` (NixOS wrapper below); nav structure untouched,
+   Status: done 2026-11-14. Thread rows reuse the match-card pattern (aria-pressed, initials
+   avatar, unread dot with sr-only label); conversation autoscrolls on new data, composer
+   autosizes to 4 rows, Enter sends only on hover-capable pointers, failed sends keep the text
+   (send button doubles as retry). `?with=` is StrictMode-safe via a lastOpened ref. Removed the
+   now-dead placeholder-page component + `placeholder.*` keys from both locales (312 keys
+   parity). Biome useExhaustiveDependencies fixed (useCallback openThread; effects reference
+   their deps). Full gate green (88 shared + 13 worker tests).
+7. [x] **e2e stays green** — run `pnpm test:e2e` (NixOS wrapper below); nav structure untouched,
    no spec should need changes. Verify: e2e green locally.
-8. [ ] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M4.md` ledger +
+   Status: 8/8 passed (phone + desktop projects) with the NixOS wrapper; no spec changes
+   needed. `[WebServer] api_error TypeError` lines remain known-tolerated local Wrangler
+   noise (all assertions green).
+8. [x] **Wrap-up** — `CLAUDE.md` current-milestone paragraph, `docs/specs/M4.md` ledger +
    verification log, full gate, `reviewer` subagent on the diff, commit. Verify: reviewer findings
    addressed, tree committed; owner pushes and CI + Deploy staging go green.
+   Status: reviewer commit-ready (6 nits; fixed unread aria-label composition, EN+EL counter
+   plural forms, encodeURIComponent on `?with=`; index-name/read-marker/lazy-meta deltas
+   documented). CLAUDE.md + ledgers updated; gate green (313 keys, 89 shared + 13 worker);
+   e2e 8/8. Owner push + CI/deploy verification pending (same pattern as M3).
 9. [ ] **Staging spot-check** — after deploy: agent verifies health + endpoint envelopes; owner
    opens a chat between two real accounts on staging and says hi. Verify: owner confirms chat
    works end-to-end; tick `M4.md` ledger.

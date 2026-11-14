@@ -8,6 +8,7 @@ import { ChatRoom } from "./chat-room";
 import type { Env } from "./env";
 import { requireSameOrigin } from "./middleware/session";
 import { campusesRoutes } from "./routes/campuses";
+import { chatsRoutes } from "./routes/chats";
 import { matchesRoutes } from "./routes/matches";
 import { meRoutes } from "./routes/me";
 import type { AppEnv } from "./types";
@@ -69,6 +70,7 @@ const routes = app
   .route("/api/v1/me", meRoutes)
   .route("/api/v1/campuses", campusesRoutes)
   .route("/api/v1/matches", matchesRoutes)
+  .route("/api/v1/chats", chatsRoutes)
   .notFound((c) =>
     c.json(
       {
