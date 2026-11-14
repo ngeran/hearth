@@ -3,6 +3,7 @@ import {
   BIO_MIN_LENGTH,
   DISPLAY_NAME_MAX_LENGTH,
   DISPLAY_NAME_MIN_LENGTH,
+  isCampusLifeStage,
   LIFE_STAGES,
   type LifeStage,
   type MeResponse,
@@ -151,6 +152,7 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
     trigger,
     watch,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
@@ -159,6 +161,14 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
   });
 
   const values = watch();
+
+  // Keep campusId consistent: when the life stage makes the university
+  // question irrelevant, drop any stale selection so it is not saved silently.
+  useEffect(() => {
+    if (!isCampusLifeStage(values.lifeStage) && (getValues("campusId") ?? null) !== null) {
+      setValue("campusId", null);
+    }
+  }, [values.lifeStage, getValues, setValue]);
 
   // Move focus to the new step heading so screen readers announce the change.
   // biome-ignore lint/correctness/useExhaustiveDependencies: refocus whenever the step changes
@@ -235,6 +245,7 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
   const campusOptions = campuses.data?.campuses ?? [];
   const lifeStage = values.lifeStage;
   const seeking = values.seeking;
+  const showCampus = isCampusLifeStage(lifeStage);
   const bioLength = (values.bio ?? "").trim().length;
   const copy = STEP_COPY[step] ?? STEP_COPY[0];
 
@@ -355,42 +366,6 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
               </Field>
               <Controller
                 control={control}
-                name="campusId"
-                render={({ field }) => (
-                  <Field
-                    id="onboarding-campus"
-                    label={t("profile.campus.label")}
-                    hint={t("profile.campus.hint")}
-                    error={errors.campusId ? t("validation.checkField") : undefined}
-                  >
-                    <Select
-                      id="onboarding-campus"
-                      value={field.value ?? ""}
-                      onChange={(event) =>
-                        field.onChange(event.target.value === "" ? null : event.target.value)
-                      }
-                      aria-describedby="onboarding-campus-hint onboarding-campus-error"
-                      invalid={Boolean(errors.campusId)}
-                    >
-                      <option value="">{t("profile.campus.none")}</option>
-                      {campusOptions.map((campus) => (
-                        <option key={campus.id} value={campus.id}>
-                          {i18n.resolvedLanguage === "el"
-                            ? `${campus.nameEl} · ${campus.cityEl}`
-                            : `${campus.name} · ${campus.city}`}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                )}
-              />
-              {campuses.isError ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {t("profile.campus.loadFailed")}
-                </p>
-              ) : null}
-              <Controller
-                control={control}
                 name="lifeStage"
                 render={({ field }) => (
                   <fieldset>
@@ -451,6 +426,46 @@ function OnboardingWizard({ me }: { me: MeResponse }) {
                   </fieldset>
                 )}
               />
+              {showCampus ? (
+                <>
+                  <Controller
+                    control={control}
+                    name="campusId"
+                    render={({ field }) => (
+                      <Field
+                        id="onboarding-campus"
+                        label={t("profile.campus.label")}
+                        hint={t("profile.campus.hint")}
+                        error={errors.campusId ? t("validation.checkField") : undefined}
+                      >
+                        <Select
+                          id="onboarding-campus"
+                          value={field.value ?? ""}
+                          onChange={(event) =>
+                            field.onChange(event.target.value === "" ? null : event.target.value)
+                          }
+                          aria-describedby="onboarding-campus-hint onboarding-campus-error"
+                          invalid={Boolean(errors.campusId)}
+                        >
+                          <option value="">{t("profile.campus.none")}</option>
+                          {campusOptions.map((campus) => (
+                            <option key={campus.id} value={campus.id}>
+                              {i18n.resolvedLanguage === "el"
+                                ? `${campus.nameEl} · ${campus.cityEl}`
+                                : `${campus.name} · ${campus.city}`}
+                            </option>
+                          ))}
+                        </Select>
+                      </Field>
+                    )}
+                  />
+                  {campuses.isError ? (
+                    <p role="alert" className="text-sm text-destructive">
+                      {t("profile.campus.loadFailed")}
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
             </>
           ) : null}
 

@@ -26,6 +26,20 @@ export const ACADEMIC_CODE_HOURLY_WINDOW_SECONDS = 60 * 60;
 export const LIFE_STAGES = ["student", "first-time-mover", "independent", "other"] as const;
 export type LifeStage = (typeof LIFE_STAGES)[number];
 
+/**
+ * Life stages where the university campus question makes sense. Freshers are
+ * usually students too, so the campus select is shown for both. The question
+ * is hidden (and any stale selection cleared) for everyone else.
+ */
+export const CAMPUS_LIFE_STAGES = [
+  "student",
+  "first-time-mover",
+] as const satisfies readonly LifeStage[];
+
+export function isCampusLifeStage(stage: LifeStage): boolean {
+  return (CAMPUS_LIFE_STAGES as readonly string[]).includes(stage);
+}
+
 export const SEEKING_TYPES = ["room", "roommate", "either"] as const;
 export type SeekingType = (typeof SEEKING_TYPES)[number];
 

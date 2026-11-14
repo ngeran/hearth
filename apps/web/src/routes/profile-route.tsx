@@ -3,6 +3,7 @@ import {
   BIO_MIN_LENGTH,
   DISPLAY_NAME_MAX_LENGTH,
   DISPLAY_NAME_MIN_LENGTH,
+  isCampusLifeStage,
   LIFE_STAGES,
   type LifeStage,
   type MeResponse,
@@ -143,6 +144,8 @@ function ProfileContent({ me }: { me: MeResponse }) {
     register,
     handleSubmit,
     watch,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
@@ -150,7 +153,17 @@ function ProfileContent({ me }: { me: MeResponse }) {
     mode: "onTouched",
   });
 
+  const lifeStage = watch("lifeStage");
+  const showCampus = isCampusLifeStage(lifeStage);
   const bioLength = (watch("bio") ?? "").trim().length;
+
+  // Keep campusId consistent: when the life stage makes the university
+  // question irrelevant, drop any stale selection so it is not saved silently.
+  useEffect(() => {
+    if (!isCampusLifeStage(lifeStage) && (getValues("campusId") ?? null) !== null) {
+      setValue("campusId", null);
+    }
+  }, [lifeStage, getValues, setValue]);
 
   const onSubmit = async (values: OnboardingFormValues) => {
     setSaveState("idle");
@@ -341,43 +354,6 @@ function ProfileContent({ me }: { me: MeResponse }) {
 
         <Controller
           control={control}
-          name="campusId"
-          render={({ field }) => (
-            <Field
-              id="profile-campus"
-              label={t("profile.campus.label")}
-              hint={t("profile.campus.hint")}
-              error={errors.campusId ? t("validation.checkField") : undefined}
-            >
-              <Select
-                id="profile-campus"
-                value={field.value ?? ""}
-                onChange={(event) =>
-                  field.onChange(event.target.value === "" ? null : event.target.value)
-                }
-                aria-describedby="profile-campus-hint profile-campus-error"
-                invalid={Boolean(errors.campusId)}
-              >
-                <option value="">{t("profile.campus.none")}</option>
-                {(campuses.data?.campuses ?? []).map((campus) => (
-                  <option key={campus.id} value={campus.id}>
-                    {i18n.resolvedLanguage === "el"
-                      ? `${campus.nameEl} · ${campus.cityEl}`
-                      : `${campus.name} · ${campus.city}`}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          )}
-        />
-        {campuses.isError ? (
-          <p role="alert" className="text-sm text-destructive">
-            {t("profile.campus.loadFailed")}
-          </p>
-        ) : null}
-
-        <Controller
-          control={control}
           name="lifeStage"
           render={({ field }) => (
             <Field
@@ -401,6 +377,47 @@ function ProfileContent({ me }: { me: MeResponse }) {
             </Field>
           )}
         />
+
+        {showCampus ? (
+          <>
+            <Controller
+              control={control}
+              name="campusId"
+              render={({ field }) => (
+                <Field
+                  id="profile-campus"
+                  label={t("profile.campus.label")}
+                  hint={t("profile.campus.hint")}
+                  error={errors.campusId ? t("validation.checkField") : undefined}
+                >
+                  <Select
+                    id="profile-campus"
+                    value={field.value ?? ""}
+                    onChange={(event) =>
+                      field.onChange(event.target.value === "" ? null : event.target.value)
+                    }
+                    aria-describedby="profile-campus-hint profile-campus-error"
+                    invalid={Boolean(errors.campusId)}
+                  >
+                    <option value="">{t("profile.campus.none")}</option>
+                    {(campuses.data?.campuses ?? []).map((campus) => (
+                      <option key={campus.id} value={campus.id}>
+                        {i18n.resolvedLanguage === "el"
+                          ? `${campus.nameEl} · ${campus.cityEl}`
+                          : `${campus.name} · ${campus.city}`}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              )}
+            />
+            {campuses.isError ? (
+              <p role="alert" className="text-sm text-destructive">
+                {t("profile.campus.loadFailed")}
+              </p>
+            ) : null}
+          </>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
