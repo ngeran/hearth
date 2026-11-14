@@ -98,9 +98,12 @@ Run the local gate after every step; tick only when it passes. Fix failures befo
    show both sides' option labels), added the overlay Tab trap + focus restore, corrected a seed
    comment; the focus-visible nit was withdrawn (global `:focus-visible` rule already styles the
    card). Full gate green.
-8. [ ] **Stage the seeds** — after the deploy is green: run `pnpm seed:matches` against staging,
+8. [x] **Stage the seeds** — after the deploy is green: run `pnpm seed:matches` against staging,
    verify with a `wrangler d1 execute … --command "SELECT count(*) …"` row count, and have the
    owner eyeball `/matches`. Verify: seed count correct, owner sees seeded matches.
+   Status: CI (run 43619747850) + Deploy staging (run 43619888801) green on 0f663f0; seeds
+   applied (12 users / 12 complete profiles confirmed via remote D1 count, all 5 archetypes);
+   staging health ok. Owner eyeball of `/matches` pending.
 
 ### NixOS e2e note (Playwright browser libs)
 
