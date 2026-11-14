@@ -69,9 +69,7 @@
     "staging": {
       "name": "hearth-staging",
       "vars": {
-        // Replace with the real workers.dev or custom-domain origin after the
-        // first `pnpm deploy:staging`.
-        "APP_ORIGIN": "https://hearth-staging.example.workers.dev"
+        "APP_ORIGIN": "https://hearth-staging.ngeran.workers.dev"
       },
       "d1_databases": [
         {

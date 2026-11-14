@@ -111,10 +111,10 @@ pnpm icons                 # regenerate PWA PNG icons
 ## Assumptions
 
 - Cloudflare D1, Queues and R2 all exist (2026-11-14) on the pinned `ngeran@gmail.com` account,
-  so infra is deploy-ready. Remaining setup: add the two documented GitHub secrets (token must be
-  created on the ngeran account); after the first staging deploy, replace the staging origin
-  placeholder in `wrangler.jsonc` and set the three Worker runtime secrets. Optionally delete the
-  stray `hearth-*` resources on the calgreece account.
+  and the staging Worker is deployed at https://hearth-staging.ngeran.workers.dev (GitHub
+  secrets set; `APP_ORIGIN` wired; `BETTER_AUTH_SECRET` set). Remaining: set `RESEND_API_KEY`
+  and `MAIL_FROM` on staging when email sending is needed. Optionally delete the stray
+  `hearth-*` resources on the calgreece account.
 - The repository is new and has no pre-existing conventions to preserve.
 - `APP_ORIGIN` is non-secret configuration in `wrangler.jsonc`; the rest of the listed values are secrets.
 - The primary development environment is NixOS on x86_64 (migrated from Termux on 2026-11-13) and the app
