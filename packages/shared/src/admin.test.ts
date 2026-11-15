@@ -86,11 +86,24 @@ describe("admin user schemas", () => {
     const detail = {
       user: userItem,
       profile: null,
+      missingProfileFields: ["displayName", "photo"],
       counts: { sessions: 0, threads: 0, rooms: 0, pushSubscriptions: 0 },
       recentThreads: [],
       rooms: [],
     };
     expect(adminUserDetailSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("rejects an unknown missing-profile reason", () => {
+    const detail = {
+      user: userItem,
+      profile: null,
+      missingProfileFields: ["nickname"],
+      counts: { sessions: 0, threads: 0, rooms: 0, pushSubscriptions: 0 },
+      recentThreads: [],
+      rooms: [],
+    };
+    expect(adminUserDetailSchema.safeParse(detail).success).toBe(false);
   });
 
   it("trims the deletion confirmation email and enforces its bounds", () => {

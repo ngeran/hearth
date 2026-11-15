@@ -13,6 +13,8 @@ import {
   adminRoomsResponseSchema,
   adminUserDetailSchema,
   adminUsersResponseSchema,
+  getMissingOnboardingFields,
+  ONBOARDING_FIELDS,
   ROOM_PHOTO_MAX_COUNT,
 } from "@hearth/shared";
 import { and, desc, eq, gte, inArray, isNotNull, like, lt, or, sql } from "drizzle-orm";
@@ -33,6 +35,7 @@ import {
 } from "../db/schema";
 import { deleteAccountData } from "../lib/account-deletion";
 import { requireAdmin } from "../lib/admin";
+import { toProfileSnapshot } from "../lib/profiles";
 import { apiError, readJsonBody } from "../lib/responses";
 import { fromUnixSeconds, nowDate, toUnixSeconds } from "../lib/time";
 import type { AppEnv } from "../types";
@@ -328,6 +331,11 @@ admin.get("/users/:id", async (c) => {
   return c.json(
     adminUserDetailSchema.parse({
       user: toAdminUserListItem(user, profile ?? null),
+      // Reasons come from the same shared rule as `/me`, so support sees exactly
+      // what the member sees. With no profile row, every field is still open.
+      missingProfileFields: profile
+        ? getMissingOnboardingFields(toProfileSnapshot(profile))
+        : [...ONBOARDING_FIELDS],
       profile: profile
         ? {
             displayName: profile.displayName,

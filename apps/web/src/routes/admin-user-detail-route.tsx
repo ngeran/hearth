@@ -15,6 +15,19 @@ const seekingLabels = {
   either: "profile.seeking.either",
 } as const;
 
+const missingFieldLabels = {
+  displayName: "admin.user.missing.displayName",
+  photo: "admin.user.missing.photo",
+  areaLabel: "admin.user.missing.areaLabel",
+  moveIn: "admin.user.missing.moveIn",
+  budget: "admin.user.missing.budget",
+  seeking: "admin.user.missing.seeking",
+  lifeStage: "admin.user.missing.lifeStage",
+  bio: "admin.user.missing.bio",
+  lifestyle: "admin.user.missing.lifestyle",
+  ageConfirmed: "admin.user.missing.ageConfirmed",
+} as const;
+
 const lifeStageLabels = {
   student: "profile.lifeStage.student",
   "first-time-mover": "profile.lifeStage.first-time-mover",
@@ -93,7 +106,7 @@ export function AdminUserDetailRoute() {
     );
   }
 
-  const { user, profile, counts, recentThreads, rooms } = detail.data;
+  const { user, profile, counts, recentThreads, rooms, missingProfileFields } = detail.data;
   const actionError =
     revoke.isError || remove.isError
       ? remove.error instanceof ApiRequestError && remove.error.code === "bad_request"
@@ -215,6 +228,20 @@ export function AdminUserDetailRoute() {
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">{t("admin.user.fields.none")}</p>
         )}
+
+        {missingProfileFields.length > 0 ? (
+          <div className="mt-4 rounded-card border border-error-container/60 bg-surface-container-low p-4">
+            <h4 className="text-label-md font-semibold">{t("admin.user.missing.title")}</h4>
+            <p className="mt-1 text-xs text-muted-foreground">{t("admin.user.missing.hint")}</p>
+            <ul className="mt-2 flex flex-wrap gap-2 text-xs">
+              {missingProfileFields.map((field) => (
+                <li key={field} className="rounded-full bg-surface-container-high px-2 py-1">
+                  {t(missingFieldLabels[field])}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">

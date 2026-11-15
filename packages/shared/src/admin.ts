@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ONBOARDING_FIELDS } from "./profile";
+
 /**
  * Admin console contracts (docs/specs/M7.md). These schemas are the only
  * shapes the Worker may return to `/api/v1/admin/*`; the console parses them
@@ -113,6 +115,12 @@ export const adminUserDetailSchema = z
   .object({
     user: adminUserListItemSchema,
     profile: adminProfileSummarySchema.nullable(),
+    /**
+     * The exact reasons the profile is incomplete, from the same shared rule
+     * the user-facing `/me` response uses, so support sees what the member sees.
+     * A member without a profile row is missing every field.
+     */
+    missingProfileFields: z.array(z.enum(ONBOARDING_FIELDS)),
     counts: z
       .object({
         sessions: z.number().int().nonnegative(),

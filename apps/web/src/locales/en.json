@@ -638,6 +638,20 @@
         "yes": "Yes",
         "no": "No"
       },
+      "missing": {
+        "title": "Still missing",
+        "hint": "Fields this member still needs to fill for a complete profile.",
+        "displayName": "Display name",
+        "photo": "Photo",
+        "areaLabel": "Area",
+        "moveIn": "Move-in dates",
+        "budget": "Budget",
+        "seeking": "What they're looking for",
+        "lifeStage": "Life stage",
+        "bio": "Bio",
+        "lifestyle": "Lifestyle answers",
+        "ageConfirmed": "Age confirmation"
+      },
       "counts": {
         "sessions": "Active sessions",
         "threads": "Conversations",

@@ -126,3 +126,24 @@ Env vars do not survive between tool calls — build and run in the same shell i
 - Error rows are scrubbed, bounded and 30-day retained; no message bodies, photos or
   emails in logs.
 - Full gate green, e2e 8/8, reviewer clean.
+
+## Follow-up: incomplete-profile reasons (2026-11-15)
+
+Owner request: show admins _why_ a member's profile is incomplete so support can help
+them finish it. The reason list must come from the same shared rule the member's own
+`/me` response uses, so the console never disagrees with the app.
+
+1. [x] **Shared contract** — add `missingProfileFields: OnboardingField[]` to
+   `adminUserDetailSchema`; extend the detail test with a valid list and reject an
+   unknown field name.
+   - Verify: `pnpm --filter @hearth/shared test`; typecheck.
+2. [x] **Worker** — in `GET /api/v1/admin/users/:id`, compute the list with
+   `getMissingOnboardingFields(toProfileSnapshot(profile))`; with no profile row,
+   return every `ONBOARDING_FIELDS` value.
+   - Verify: typecheck; worker tests stay green.
+3. [x] **Console** — user detail shows a "Still missing" block with one chip per
+   reason, only when non-empty; labels are typed keys (`admin.user.missing.*`, native
+   Greek), no API-provided copy rendered.
+   - Verify: `pnpm check:i18n`, `pnpm typecheck`, `pnpm build`.
+4. [x] **Docs + gate** — M7.md UI/acceptance/ledger/log updated; full gate green.
+   - Verify: `pnpm typecheck && pnpm lint && pnpm check:i18n && pnpm test && pnpm build`.
