@@ -11,9 +11,10 @@ import { and, eq, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createDb } from "../db/client";
-import { profiles, rooms, users } from "../db/schema";
+import { matchEvents, profiles, rooms, users } from "../db/schema";
 import { toProfileSnapshot } from "../lib/profiles";
 import { apiError } from "../lib/responses";
+import { nowDate, toUnixSeconds } from "../lib/time";
 import { requireSession } from "../middleware/session";
 import type { AppEnv } from "../types";
 
@@ -101,6 +102,22 @@ matches.get("/", async (c) => {
   );
 
   const visible = items.slice(0, MATCHES_LIMIT);
+
+  // M7 metrics: record first impressions only (pair is the primary key), off
+  // the response path. A later feed render never duplicates or rewrites a row.
+  if (visible.length > 0) {
+    const shownAt = toUnixSeconds(nowDate());
+    c.executionCtx.waitUntil(
+      db
+        .insert(matchEvents)
+        .values(
+          visible.map((item) => ({ viewerId: id, candidateId: item.userId, createdAt: shownAt })),
+        )
+        .onConflictDoNothing()
+        .then(() => undefined)
+        .catch(() => undefined),
+    );
+  }
 
   // M5 "has a room" filter: one indexed lookup instead of a per-row join.
   const activeListers = visible.length

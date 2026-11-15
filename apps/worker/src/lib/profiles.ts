@@ -113,6 +113,7 @@ export async function getMeResponse(
   db: Db,
   userId: string,
   acceptLanguage: string | undefined,
+  isAdmin: boolean,
 ): Promise<MeResponse> {
   const user = await db.select().from(users).where(eq(users.id, userId)).get();
 
@@ -129,6 +130,7 @@ export async function getMeResponse(
     profile: snapshot,
     complete: missingFields.length === 0,
     missingFields,
+    isAdmin,
   });
 }
 
@@ -137,6 +139,7 @@ export async function applyProfilePatch(
   userId: string,
   patch: ProfilePatch,
   acceptLanguage: string | undefined,
+  isAdmin: boolean,
 ): Promise<MeResponse> {
   const current = await ensureProfile(db, userId, preferredLanguageFromHeader(acceptLanguage));
 
@@ -254,5 +257,5 @@ export async function applyProfilePatch(
       .where(eq(users.id, userId));
   }
 
-  return getMeResponse(db, userId, acceptLanguage);
+  return getMeResponse(db, userId, acceptLanguage, isAdmin);
 }

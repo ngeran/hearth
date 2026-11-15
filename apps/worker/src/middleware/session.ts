@@ -1,7 +1,12 @@
+import { ADMIN_PRESENCE_TOUCH_SECONDS } from "@hearth/shared";
+import { and, eq, lt } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 
 import { createAuth } from "../auth";
+import { createDb } from "../db/client";
+import { users } from "../db/schema";
 import { apiError } from "../lib/responses";
+import { nowDate, toUnixSeconds } from "../lib/time";
 import type { AppEnv } from "../types";
 
 export const requireSession = createMiddleware<AppEnv>(async (c, next) => {
@@ -14,6 +19,20 @@ export const requireSession = createMiddleware<AppEnv>(async (c, next) => {
 
   c.set("user", result.user);
   c.set("session", result.session);
+
+  // M7 presence (docs/specs/M7.md): the WHERE clause is the throttle — at most
+  // one write per user per five minutes, and it never delays the response.
+  const now = toUnixSeconds(nowDate());
+  c.executionCtx.waitUntil(
+    createDb(c.env.DB)
+      .update(users)
+      .set({ lastSeenAt: now })
+      .where(
+        and(eq(users.id, result.user.id), lt(users.lastSeenAt, now - ADMIN_PRESENCE_TOUCH_SECONDS)),
+      )
+      .then(() => undefined)
+      .catch(() => undefined),
+  );
 
   await next();
 });

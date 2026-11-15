@@ -7,7 +7,6 @@ import {
   academicEmailRequestSchema,
   academicEmailVerifySchema,
   academicVerificationResponseSchema,
-  chatThreadId,
   deleteAccountSchema,
   exportResponseSchema,
   ImageValidationError,
@@ -16,29 +15,19 @@ import {
   profilePatchSchema,
   sanitizeImage,
 } from "@hearth/shared";
-import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createDb, type Db } from "../db/client";
-import {
-  academicVerifications,
-  account,
-  auditLog,
-  chatThreads,
-  passkey,
-  profiles,
-  pushSubscriptions,
-  rooms,
-  session,
-  users,
-  verification,
-} from "../db/schema";
+import { academicVerifications, auditLog, passkey, profiles, session, users } from "../db/schema";
 import {
   constantTimeEqual,
   generateAcademicCode,
   hashAcademicCode,
   preferredLanguageFromHeader,
 } from "../lib/academic-code";
+import { deleteAccountData } from "../lib/account-deletion";
+import { isAdminEmail } from "../lib/admin";
 import {
   applyProfilePatch,
   ensureProfile,
@@ -90,7 +79,12 @@ async function latestChallenge(db: Db, id: string) {
 
 me.get("/", async (c) => {
   const db = createDb(c.env.DB);
-  const response = await getMeResponse(db, userId(c), c.req.header("accept-language"));
+  const response = await getMeResponse(
+    db,
+    userId(c),
+    c.req.header("accept-language"),
+    isAdminEmail(c.env, c.get("user").email),
+  );
 
   return c.json(response);
 });
@@ -121,6 +115,7 @@ me.put("/", async (c) => {
       userId(c),
       parsed.data,
       c.req.header("accept-language"),
+      isAdminEmail(c.env, c.get("user").email),
     );
 
     return c.json(response);
@@ -508,56 +503,7 @@ me.delete("/", async (c) => {
     return apiError(c, 401, "unauthorized", "Sign in to continue.");
   }
 
-  const profile = await db.select().from(profiles).where(eq(profiles.userId, id)).get();
-
-  if (profile?.photoKey) {
-    await c.env.PHOTOS.delete(profile.photoKey);
-  }
-
-  // Room listing photos live in R2 under rooms/<id>/*; the FK cascade drops
-  // the listing rows themselves, so the bytes must be removed explicitly
-  // (missing keys delete as a no-op).
-  const myRooms = await db.select({ id: rooms.id }).from(rooms).where(eq(rooms.listerId, id));
-  for (const room of myRooms) {
-    await c.env.PHOTOS.delete([
-      `rooms/${room.id}/0.jpg`,
-      `rooms/${room.id}/1.jpg`,
-      `rooms/${room.id}/2.jpg`,
-    ]);
-  }
-
-  // Purge every conversation body from the ChatRoom Durable Objects before
-  // the D1 cleanup removes the thread rows (the FK cascade only drops
-  // metadata). Bodies live solely inside the DOs, so deletion must reach
-  // each one individually.
-  const threads = await db
-    .select()
-    .from(chatThreads)
-    .where(or(eq(chatThreads.userLow, id), eq(chatThreads.userHigh, id)));
-  for (const thread of threads) {
-    const peerId = thread.userLow === id ? thread.userHigh : thread.userLow;
-    const stub = c.env.CHAT.get(c.env.CHAT.idFromName(chatThreadId(id, peerId)));
-    await stub.fetch("https://chat-room/purge", {
-      method: "POST",
-      headers: { "x-hearth-user-id": id, "x-hearth-peer-id": peerId },
-    });
-  }
-
-  const otpIdentifiers = [
-    "sign-in-otp",
-    "email-verification-otp",
-    "forget-password-otp",
-    "change-email-otp",
-  ].map((prefix) => `${prefix}-${user.email}`);
-
-  await db.delete(verification).where(inArray(verification.identifier, otpIdentifiers));
-  await db.delete(academicVerifications).where(eq(academicVerifications.userId, id));
-  await db.delete(passkey).where(eq(passkey.userId, id));
-  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, id));
-  await db.delete(account).where(eq(account.userId, id));
-  await db.delete(session).where(eq(session.userId, id));
-  await db.delete(profiles).where(eq(profiles.userId, id));
-  await db.delete(users).where(eq(users.id, id));
+  await deleteAccountData(c.env, db, { id, email: user.email });
 
   await db.insert(auditLog).values({
     id: crypto.randomUUID(),

@@ -10,6 +10,8 @@ export interface Env {
   MAIL_FROM?: string;
   ENVIRONMENT?: string;
   AUTH_TEST_OTP?: string;
+  /** Admin console allowlist (docs/specs/M7.md): comma-separated emails, secret. */
+  ADMIN_EMAILS?: string;
   /** Web Push VAPID (docs/specs/M6.md): public key + subject are non-secret vars. */
   VAPID_PUBLIC_KEY?: string;
   VAPID_SUBJECT?: string;

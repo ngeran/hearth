@@ -1,4 +1,4 @@
-import { BedDouble, Heart, LogIn, MessageCircle, UserRound } from "lucide-react";
+import { BedDouble, Heart, LogIn, MessageCircle, ShieldCheck, UserRound } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router-dom";
@@ -19,6 +19,8 @@ const navItems = [
   { to: "/profile", labelKey: "nav.profile", icon: UserRound },
 ] as const;
 
+const adminNavItem = { to: "/admin", labelKey: "nav.admin", icon: ShieldCheck } as const;
+
 export function AppShell() {
   const { t, i18n } = useTranslation();
   const isOnline = useOnlineStatus();
@@ -27,6 +29,7 @@ export function AppShell() {
   const year = new Intl.NumberFormat(i18n.resolvedLanguage).format(new Date().getFullYear());
   const copyright = t("footer.copyright", { year });
   const signedIn = Boolean(session.data);
+  const visibleNavItems = me.data?.isAdmin ? [...navItems, adminNavItem] : navItems;
   const identity =
     me.data?.profile.displayName ?? session.data?.user.name ?? session.data?.user.email ?? "";
 
@@ -59,7 +62,7 @@ export function AppShell() {
 
           <nav aria-label={t("nav.label")} className="mt-8">
             <ul className="space-y-1">
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const Icon = item.icon;
 
                 return (
@@ -159,8 +162,13 @@ export function AppShell() {
         aria-label={t("nav.label")}
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-1 px-2 py-2">
-          {navItems.map((item) => {
+        <div
+          className={cn(
+            "mx-auto grid max-w-md gap-1 px-2 py-2",
+            visibleNavItems.length > navItems.length ? "grid-cols-5" : "grid-cols-4",
+          )}
+        >
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
 
             return (

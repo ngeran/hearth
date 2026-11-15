@@ -389,6 +389,8 @@ export const meResponseSchema = z.object({
   profile: profileSnapshotSchema,
   complete: z.boolean(),
   missingFields: z.array(z.enum(ONBOARDING_FIELDS)),
+  /** M7: drives the admin entry in the shell; never implies access by itself. */
+  isAdmin: z.boolean(),
 });
 
 export type MeResponse = z.infer<typeof meResponseSchema>;

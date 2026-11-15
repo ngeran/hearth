@@ -1,7 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import { AdminShell } from "@/components/admin-shell";
 import { AppShell } from "@/components/app-shell";
 import { RequireAuth } from "@/components/require-auth";
+import { AdminErrorsRoute } from "@/routes/admin-errors-route";
+import { AdminOverviewRoute } from "@/routes/admin-overview-route";
+import { AdminRoomsRoute } from "@/routes/admin-rooms-route";
+import { AdminUserDetailRoute } from "@/routes/admin-user-detail-route";
+import { AdminUsersRoute } from "@/routes/admin-users-route";
 import { HomeRoute } from "@/routes/home-route";
 import { MatchesRoute } from "@/routes/matches-route";
 import { MessagesRoute } from "@/routes/messages-route";
@@ -24,6 +30,22 @@ export const router = createBrowserRouter([
         <OnboardingRoute />
       </RequireAuth>
     ),
+  },
+  {
+    path: "/admin",
+    element: (
+      <RequireAuth>
+        <AdminShell />
+      </RequireAuth>
+    ),
+    children: [
+      { index: true, element: <AdminOverviewRoute /> },
+      { path: "users", element: <AdminUsersRoute /> },
+      { path: "users/:id", element: <AdminUserDetailRoute /> },
+      { path: "errors", element: <AdminErrorsRoute /> },
+      { path: "rooms", element: <AdminRoomsRoute /> },
+      { path: "*", element: <NotFoundRoute /> },
+    ],
   },
   {
     path: "/",

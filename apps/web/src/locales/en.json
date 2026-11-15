@@ -14,7 +14,8 @@
     "messages": "Messages",
     "profile": "Profile",
     "signIn": "Sign in",
-    "account": "Your account"
+    "account": "Your account",
+    "admin": "Admin"
   },
   "header": {
     "language": "Language",
@@ -547,6 +548,138 @@
     "denied": "Blocked in your browser settings. You can re-enable them from this site's permissions.",
     "unsupported": "This browser can't receive notifications yet.",
     "unavailable": "Notifications aren't configured yet — check back soon."
+  },
+  "admin": {
+    "title": "Operations",
+    "back": "Back to Hearth",
+    "tabs": {
+      "overview": "Overview",
+      "users": "Members",
+      "rooms": "Listings",
+      "errors": "Errors"
+    },
+    "search": "Search",
+    "all": "All",
+    "previous": "Previous",
+    "next": "Next",
+    "actions": {
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "overview": {
+      "subtitle": "A calm read on how Hearth is doing.",
+      "users": {
+        "total": "Members",
+        "today": "Joined today",
+        "online": "Online now",
+        "complete": "Complete profiles",
+        "verified": "Verified students"
+      },
+      "rooms": {
+        "active": "Active listings"
+      },
+      "matches": {
+        "impressions": "Matches shown (7 days)",
+        "successful": "Matched conversations",
+        "unsuccessful": "Shown, no chat (7 days)"
+      },
+      "chat": {
+        "active": "Conversations active (7 days)"
+      },
+      "push": {
+        "subscriptions": "Push devices"
+      },
+      "errors": {
+        "last24h": "Errors (24 hours)"
+      },
+      "hints": {
+        "week": "+{{count}} this week",
+        "online": "Active in the last 15 minutes",
+        "onboarded": "Onboarding finished",
+        "verified": "Academic email verified",
+        "listingsTotal": "{{count}} in total",
+        "errorsWeek": "{{count}} in 7 days"
+      },
+      "recentErrors": "Latest errors",
+      "viewAll": "View all",
+      "noErrors": "No errors recorded. Quiet is good."
+    },
+    "users": {
+      "subtitle": "Look up a member and their state.",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Email or display name",
+      "empty": "No members match that search.",
+      "deleted": "Deleted",
+      "status": {
+        "active": "Active"
+      },
+      "profileComplete": "Complete",
+      "profileIncomplete": "Incomplete",
+      "joined": "Joined {{date}}",
+      "lastSeen": "Seen {{date}}",
+      "never": "Never seen"
+    },
+    "user": {
+      "back": "All members",
+      "profile": "Profile",
+      "actions": "Actions",
+      "fields": {
+        "area": "Area",
+        "seeking": "Looking for",
+        "lifeStage": "Life stage",
+        "budget": "Budget",
+        "moveIn": "Move-in",
+        "language": "Language",
+        "ageConfirmed": "Age confirmed",
+        "onboarding": "Onboarding completed",
+        "academic": "Academic email",
+        "bio": "Bio",
+        "none": "Not set",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "counts": {
+        "sessions": "Active sessions",
+        "threads": "Conversations",
+        "rooms": "Listings",
+        "pushes": "Push devices"
+      },
+      "threads": {
+        "title": "Recent conversations",
+        "empty": "No conversations yet."
+      },
+      "rooms": {
+        "title": "Listings",
+        "empty": "No listings."
+      },
+      "revoke": "Sign out everywhere",
+      "revokeConfirm": "Sign this member out of every device?",
+      "delete": "Delete account",
+      "deleteHint": "This removes their profile, photos, listings and conversations. It cannot be undone.",
+      "deleteEmail": "Type the account email to confirm",
+      "deleteConfirm": "Delete permanently",
+      "checkEmail": "The email does not match this account.",
+      "failed": "That action did not complete. Please try again."
+    },
+    "errors": {
+      "subtitle": "Scrubbed server errors. Messages are capped and redacted.",
+      "routeFilter": "Route",
+      "routePlaceholder": "/api/v1/…",
+      "statusFilter": "Status",
+      "empty": "No errors recorded."
+    },
+    "rooms": {
+      "subtitle": "Everything listed on Hearth.",
+      "searchPlaceholder": "Title or area",
+      "statusFilter": "Status",
+      "empty": "No listings match.",
+      "status": {
+        "active": "Active",
+        "withdrawn": "Withdrawn"
+      },
+      "delete": "Delete",
+      "deleteConfirm": "Delete this listing and its photos?"
+    }
   },
   "offline": {
     "title": "You're offline",

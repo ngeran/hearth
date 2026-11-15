@@ -25,6 +25,8 @@ export const users = sqliteTable(
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
     deletedAt: timestamp("deleted_at"),
+    // M7 presence: unix seconds, 0 until the first throttled touch.
+    lastSeenAt: integer("last_seen_at").notNull().default(0),
   },
   (table) => [index("idx_users_status").on(table.status)],
 );
@@ -256,6 +258,48 @@ export const pushSubscriptions = sqliteTable(
     updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [index("idx_push_subscriptions_user").on(table.userId)],
+);
+
+// M7 admin console: scrubbed server errors (no headers, query strings, or user
+// ids; the message is redacted and capped by the Worker before insertion).
+export const errorEvents = sqliteTable(
+  "error_events",
+  {
+    id: text("id").primaryKey(),
+    createdAt: integer("created_at").notNull(),
+    requestId: text("request_id"),
+    method: text("method").notNull(),
+    route: text("route").notNull(),
+    status: integer("status").notNull(),
+    errorName: text("error_name").notNull(),
+    message: text("message").notNull(),
+  },
+  (table) => [
+    index("idx_error_events_created").on(table.createdAt),
+    index("idx_error_events_route_created").on(table.route, table.createdAt),
+  ],
+);
+
+// M7 match metrics: one directed row per viewer/candidate pair, recording the
+// first time the matches feed showed them. "Successful" pairs are the ones that
+// later gained a chat_threads row; the pair is the primary key, so re-rendering
+// the feed never duplicates an impression.
+export const matchEvents = sqliteTable(
+  "match_events",
+  {
+    viewerId: text("viewer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    candidateId: text("candidate_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.viewerId, table.candidateId] }),
+    index("idx_match_events_created").on(table.createdAt),
+    index("idx_match_events_candidate").on(table.candidateId),
+  ],
 );
 
 export const auditLog = sqliteTable(

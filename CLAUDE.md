@@ -7,16 +7,15 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M6 — Web push notifications per `docs/specs/M6.md`: implementation complete (PLAN steps 1–6;
-owner approved all six decision rows on 2026-11-15) — chat-message pushes only, sender-name-only
-payloads, unread-gated delivery via the JOBS queue consumer, VAPID keys per environment,
-injectManifest service worker with the manual update contract preserved, NotificationsCard on the
-profile. Pending: wrap-up commit → push → CI + staging deploy → owner VAPID setup + two-device
-live push test → owner approval, then the 8-tester round (the M2–M6 roadmap the owner approved on
-2026-11-14 is then complete). M5 (rooms) shipped in `f4df538` with seeded listings; M4 (1:1 chat on
-the ChatRoom Durable Object) shipped in `d94d8a8`; M3 (matching engine, matches UI, compatibility
-report) shipped in `0f663f0` with seeded synthetic matches; M2 (lifestyle questionnaire) shipped in
-`30e6998`. M1 Worker and Playwright tests stay deferred at the
+M7 — Admin operations console per `docs/specs/M7.md`: implementation complete (PLAN steps 1–8;
+owner approved the scoping decisions on 2026-11-15) — `/admin` routes in the web app,
+`ADMIN_EMAILS` secret allowlist with 404 parity for non-admins, user lookup with session revoke
+and audited account deletion, listing moderation, scrubbed `error_events` (30-day retention),
+presence-based online metric, and match impression tracking. M6 (web push, `88fb71a`) and M7 are
+committed locally and pending: owner push → CI + staging deploy → `ADMIN_EMAILS` secret + M6
+two-device live test → staging spot-check → 8-tester round. M5 (rooms) shipped in `f4df538`;
+M4 (1:1 chat on the ChatRoom Durable Object) shipped in `d94d8a8`; M3 (matching engine) shipped
+in `0f663f0`; M2 (lifestyle questionnaire) shipped in `30e6998`. M1 Worker and Playwright tests stay deferred at the
 user's request (see `docs/specs/M1.md`); M4 adds a Durable Object unit test plus shared unit tests,
 and the existing e2e smoke suite stays green.
 
@@ -76,6 +75,19 @@ pnpm icons                 # regenerate PWA PNG icons
   light mode because white text on `#C8553D` is 4.35:1, below WCAG AA for normal text.
 - 2026-11-09 — Headings use Source Serif 4 and body text uses Inter, both self-hosted via Fontsource and
   both include Greek subsets. No third-party font requests.
+- 2026-11-15 — Admin access is an `ADMIN_EMAILS` secret allowlist (comma-separated,
+  case-insensitive). Admin routes return the standard 404 to signed-out and non-allowlisted
+  callers (no existence oracle) and fail closed when the binding is unset. Every admin mutation
+  writes an `audit_log` row; admin room deletion is a hard delete of rows plus R2 photos, so the
+  room status contract stays unchanged.
+- 2026-11-15 — `error_events` stores scrubbed server errors only: route/method/status/name, no
+  headers, query string or user id, and a 200-char message with emails and token-like runs
+  redacted. 30-day retention pruned on the errors listing (no cron). Queue consumer failures
+  remain counts-only logs.
+- 2026-11-15 — Online is `users.last_seen_at`, touched at most once per five minutes inside
+  `requireSession` and read with a 15-minute window. Match success is a `chat_threads` row;
+  unsuccessful is a directed first-impression row in `match_events` older than seven days with
+  no thread for the pair (pair is the primary key, so renders never duplicate).
 - 2026-11-15 — `webpush-webcrypto` (apps/worker, runtime): zero-dependency WebCrypto Web Push
   library, the only pure-JS push sender verified to work on Workers (`web-push` is Node-centric
   and unsupported there per its own issue tracker). Justified for M6; lockfile committed.

@@ -24,3 +24,5 @@ ENVIRONMENT=development
 # VAPID_PUBLIC_KEY=
 # VAPID_SUBJECT=mailto:you@example.com
 # VAPID_PRIVATE_KEY=
+# Comma-separated admin allowlist (docs/specs/M7.md). Leave empty to disable.
+ADMIN_EMAILS=you@example.com

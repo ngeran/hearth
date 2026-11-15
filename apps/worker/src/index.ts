@@ -6,8 +6,10 @@ import { secureHeaders } from "hono/secure-headers";
 import { createAuth } from "./auth";
 import { ChatRoom } from "./chat-room";
 import type { Env } from "./env";
+import { recordErrorEvent } from "./lib/admin";
 import { handlePushBatch } from "./lib/push-jobs";
 import { requireSameOrigin } from "./middleware/session";
+import { adminRoutes } from "./routes/admin";
 import { campusesRoutes } from "./routes/campuses";
 import { chatsRoutes } from "./routes/chats";
 import { matchesRoutes } from "./routes/matches";
@@ -76,6 +78,7 @@ const routes = app
   .route("/api/v1/chats", chatsRoutes)
   .route("/api/v1/rooms", roomsRoutes)
   .route("/api/v1/me/push", pushRoutes)
+  .route("/api/v1/admin", adminRoutes)
   .notFound((c) =>
     c.json(
       {
@@ -95,6 +98,8 @@ const routes = app
       requestId: c.get("requestId"),
       errorName: error.name,
     });
+    // M7 console: one scrubbed row per unhandled error (never throws).
+    recordErrorEvent(c.env, c, error);
 
     return c.json(
       {
