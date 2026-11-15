@@ -239,6 +239,25 @@ export const rooms = sqliteTable(
   ],
 );
 
+// M6 web push subscriptions: one row per device. The push-service
+// endpoint is the natural key (re-subscribe upserts); rows cascade with
+// the account, and the me.ts purge block also deletes them explicitly
+// to match house style.
+export const pushSubscriptions = sqliteTable(
+  "push_subscriptions",
+  {
+    endpoint: text("endpoint").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
+  },
+  (table) => [index("idx_push_subscriptions_user").on(table.userId)],
+);
+
 export const auditLog = sqliteTable(
   "audit_log",
   {

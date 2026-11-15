@@ -16,7 +16,11 @@
   "vars": {
     // Better Auth trusted origin and the same-origin write guard. Local dev uses
     // the Vite origin; production must match the deployed Worker origin.
-    "APP_ORIGIN": "http://localhost:5173"
+    "APP_ORIGIN": "http://localhost:5173",
+    // Web Push VAPID (docs/specs/M6.md). Public values — the private key is a
+    // wrangler secret. Generate with: pnpm vapid:generate
+    "VAPID_PUBLIC_KEY": "",
+    "VAPID_SUBJECT": ""
   },
   "d1_databases": [
     {
@@ -55,7 +59,8 @@
     ],
     "consumers": [
       {
-        "queue": "hearth-jobs"
+        "queue": "hearth-jobs",
+        "max_retries": 3
       }
     ]
   },
@@ -69,7 +74,11 @@
     "staging": {
       "name": "hearth-staging",
       "vars": {
-        "APP_ORIGIN": "https://hearth-staging.ngeran.workers.dev"
+        "APP_ORIGIN": "https://hearth-staging.ngeran.workers.dev",
+        // Filled with the owner-generated VAPID pair (pnpm vapid:generate);
+        // VAPID_PRIVATE_KEY is set as a secret, not a var.
+        "VAPID_PUBLIC_KEY": "",
+        "VAPID_SUBJECT": ""
       },
       "d1_databases": [
         {
@@ -108,7 +117,8 @@
         ],
         "consumers": [
           {
-            "queue": "hearth-jobs-staging"
+            "queue": "hearth-jobs-staging",
+            "max_retries": 3
           }
         ]
       },

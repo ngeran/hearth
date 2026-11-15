@@ -39,6 +39,7 @@ import { Link } from "react-router-dom";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/form-controls";
 import { LifestyleQuestionnaire } from "@/components/lifestyle-questionnaire";
 import { LifestyleSummary } from "@/components/lifestyle-summary";
+import { NotificationsCard } from "@/components/notifications-card";
 import { PageError, PageLoading } from "@/components/page-states";
 import { PhotoField } from "@/components/photo-field";
 import { Button } from "@/components/ui/button";
@@ -600,6 +601,8 @@ function ProfileContent({ me }: { me: MeResponse }) {
         onRemove={(id) => void removePasskey(id)}
         errorKey={passkeyError}
       />
+
+      <NotificationsCard />
 
       <section className="space-y-4 rounded-card border bg-card p-5 text-card-foreground shadow-soft sm:p-6">
         <h2 className="text-headline-md">{t("profile.data.title")}</h2>

@@ -17,3 +17,10 @@ ENVIRONMENT=development
 
 # Test-only fixed OTP (six digits). Keep unset everywhere else.
 # AUTH_TEST_OTP=123456
+
+# Web Push VAPID keys (docs/specs/M6.md). Generate with: pnpm vapid:generate
+# The public key + subject are non-secret; the private key is always a secret.
+# Local dev serves no service worker, so these stay commented here.
+# VAPID_PUBLIC_KEY=
+# VAPID_SUBJECT=mailto:you@example.com
+# VAPID_PRIVATE_KEY=

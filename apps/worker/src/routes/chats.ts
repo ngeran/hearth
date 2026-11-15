@@ -264,6 +264,32 @@ chats.post("/:peerId/messages", async (c) => {
     .set({ updatedAt: nowDate() })
     .where(and(eq(chatThreads.userLow, row.userLow), eq(chatThreads.userHigh, row.userHigh)));
 
+  // Fire-and-forget notification job (docs/specs/M6.md): the consumer
+  // re-checks the recipient's read marker at consume time, so this can never
+  // block, duplicate, or fail the send itself. The name lookup is also
+  // best-effort — a D1 hiccup here degrades the push to the no-name
+  // fallback instead of failing the 201 after delivery.
+  let senderName = "";
+  try {
+    const senderRow = await db
+      .select({ displayName: profiles.displayName })
+      .from(profiles)
+      .where(eq(profiles.userId, id))
+      .get();
+    senderName = senderRow?.displayName ?? "";
+  } catch {
+    // Delivered message + failed lookup beats an error for a delivered message.
+  }
+  c.executionCtx.waitUntil(
+    c.env.JOBS.send({
+      recipientId: peerId,
+      senderId: id,
+      senderName,
+      threadLow: row.userLow,
+      threadHigh: row.userHigh,
+    }),
+  );
+
   return c.json(message, 201, { "cache-control": "no-store" });
 });
 

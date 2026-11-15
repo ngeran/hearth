@@ -244,6 +244,9 @@ importers:
       tailwind-merge:
         specifier: 3.7.0
         version: 3.7.0
+      workbox-precaching:
+        specifier: 7.4.1
+        version: 7.4.1
       workbox-window:
         specifier: 7.4.1
         version: 7.4.1
@@ -305,6 +308,9 @@ importers:
       hono:
         specifier: 4.13.17
         version: 4.13.17
+      webpush-webcrypto:
+        specifier: ^1.0.5
+        version: 1.0.5
       zod:
         specifier: 4.6.7
         version: 4.6.7
@@ -3855,6 +3861,9 @@ packages:
       jsdom:
         optional: true
 
+  webpush-webcrypto@1.0.5:
+    resolution: {integrity: sha512-lDKQtVxi97dJQeJ6SK4kZHazYzCc6GosluXMqzLYwBc8z2il15l8zxW1e7qAF6GrcPdpHgBZkbI17mNvOQ8lZg==}
+
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
     engines: {node: '>= 0.4'}
@@ -7145,6 +7154,8 @@ snapshots:
       '@types/node': 26.6.6
     transitivePeerDependencies:
       - msw
+
+  webpush-webcrypto@1.0.5: {}
 
   which-boxed-primitive@1.1.1:
     dependencies:

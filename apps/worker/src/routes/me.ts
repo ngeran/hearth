@@ -27,6 +27,7 @@ import {
   chatThreads,
   passkey,
   profiles,
+  pushSubscriptions,
   rooms,
   session,
   users,
@@ -552,6 +553,7 @@ me.delete("/", async (c) => {
   await db.delete(verification).where(inArray(verification.identifier, otpIdentifiers));
   await db.delete(academicVerifications).where(eq(academicVerifications.userId, id));
   await db.delete(passkey).where(eq(passkey.userId, id));
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, id));
   await db.delete(account).where(eq(account.userId, id));
   await db.delete(session).where(eq(session.userId, id));
   await db.delete(profiles).where(eq(profiles.userId, id));

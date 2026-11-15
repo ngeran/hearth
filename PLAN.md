@@ -34,18 +34,28 @@ command passes. Keep the gate green between steps.
 
 ## Steps
 
-1. [ ] **Shared push module** — `packages/shared/src/push.ts`: VAPID key response
+1. [x] **Shared push module** — `packages/shared/src/push.ts`: VAPID key response
    schema, pushSubscriptionSchema (endpoint z.url or https string max 2048, keys
    strict {p256dh, auth} base64url-ish strings), pushDeleteSchema; tests (URL shape,
    missing keys, strictness, length caps). Export from index.ts (alphabetical).
    Verify: `pnpm --filter @hearth/shared test && pnpm typecheck`.
-2. [ ] **Migration 0006 + drizzle** — `migrations/0006_push_subscriptions.sql` per
+   - Status: done. Local pushEndpointSchema = https-prefix refine + max 2048 (no
+     z.url — keeps codebase off unverified Zod 4 format APIs); client keys
+     base64url regex `/^[A-Za-z0-9_-]+={0,2}$/` (RFC 8291, padding tolerated);
+     all three schemas .strict(). 9 new tests → 115 shared green; typecheck ×3
+     clean; index export between profile and room.
+2. [x] **Migration 0006 + drizzle** — `migrations/0006_push_subscriptions.sql` per
    spec DDL (endpoint PK, FK cascade, idx_push_subscriptions_user); drizzle
    `pushSubscriptions` table in schema.ts after rooms; node:sqlite proof
    (/tmp/opencode/m6-migration-proof.mjs, fresh 0000→0006): insert, upsert on endpoint
    PK, FK cascade, index exists, re-apply rejected. Verify: proof ALL PASS + `pnpm
-   --filter @hearth/worker typecheck && pnpm --filter @hearth/worker test`.
-3. [ ] **Worker push lib + routes** — add `webpush-webcrypto` to apps/worker deps;
+    --filter @hearth/worker typecheck && pnpm --filter @hearth/worker test`.
+   - Status: proof ALL PASS (8 checks: natural-PK duplicate reject, second device
+     allowed, cross-user endpoint claim reject, ghost-user FK reject, cascade drops
+     rows, index present, re-apply rejected); drizzle table after rooms/before
+     auditLog; worker typecheck clean, 13 worker tests green (vitest applied 0006);
+     format no fixes, lint 1 pre-existing info.
+3. [x] **Worker push lib + routes** — add `webpush-webcrypto` to apps/worker deps;
    `declare module` shim; `lib/web-push.ts` (load keys from env via fromJSON — verify
    toJSON field names first; buildPushPayload(senderName, language) with EN/EL copy;
    sendPushToSubscription with 404/410 → prune signal; 503 when VAPID unset);
@@ -55,17 +65,40 @@ command passes. Keep the gate green between steps.
    `VAPID_PRIVATE_KEY` optional secret; `.dev.vars.example` entries;
    `scripts/generate-vapid-keys.mjs` (prints toJSON pair + export commands);
    package.json script `vapid:generate`. Verify: typecheck + tests + `pnpm build`.
-4. [ ] **Chats enqueue + queue consumer** — chats.ts POST /:peerId/messages:
+   - Status: API verified against installed dist (b33) — shim at
+     `src/webpush-webcrypto.d.ts` (flat, tsconfig includes src). lib/web-push.ts:
+     PUSH_TTL_SECONDS=3600, urgency normal, buildChatPushPayload(senderName,
+     senderId, language) — url carries encodeURIComponent(senderId); loadVapidKeys
+     is async (fromJSON imports keys), malformed keys → null (unconfigured).
+     Outcome union: sent|prune|unconfigured|failed(status). routes/push.ts: POST
+     upserts on endpoint PK (row follows latest owner), DELETE matching
+     endpoint+owner via returning() → 404 when 0 rows. index.ts mounts
+     `/api/v1/me/push` after rooms (no pattern overlap with meRoutes).
+     Key script reimplements generate+toJSON with Node WebCrypto (base64url
+     raw/pkcs8) — no cross-package import needed. Verified: script emits valid
+     pair; worker typecheck clean; 13 worker tests; pnpm build dry-run shows
+     VAPID_PUBLIC_KEY/VAPID_SUBJECT vars bound.
+4. [x] **Chats enqueue + queue consumer** — chats.ts POST /:peerId/messages:
    `c.executionCtx.waitUntil(c.env.JOBS.send({ recipientId: peerId, senderId: id,
-   senderName: meSnapshot displayName… }))` — senderName resolved without new queries
+    senderName: meSnapshot displayName… }))` — senderName resolved without new queries
    if available, else job carries ids only and consumer loads names from D1;
    index.ts `queue(batch)`: per message validate job (Zod), ChatRoom /state as
    recipient → skip when last.seq <= myRead or last.author === recipientId, load
    recipient subscriptions + language, send per subscription, prune on 404/410,
    aggregate failures without PII logs; wrangler.jsonc both consumers `max_retries:
-   3`; me.ts purge explicit pushSubscriptions delete. Verify: typecheck + tests +
+    3`; me.ts purge explicit pushSubscriptions delete. Verify: typecheck + tests +
    build.
-5. [ ] **Web SW + NotificationsCard + locales** — vite.config.ts →
+   - Status: enqueue after D1 bump via waitUntil; senderName lookup best-effort
+     try/catch → "" (reviewer fix: a D1 hiccup can never fail the 201 after delivery;
+     consumer has the no-name payload fallback). handlePushBatch: keys loaded once
+     per batch, malformed jobs ack'd, transient/failed → message.retry() (max_retries
+     3 both envs), counts-only log. Unread-gated at consume via DO /state as
+     recipient; 404/410 prunes rows; failed returns early so retries don't
+     double-fire already-sent pushes (reviewer fix). apps/web tsconfig includes the
+     worker shim (web compiles worker sources via AppType). Verified: full gate
+     green — typecheck ×3, tests 115 shared + 13 worker, build dry-run, i18n 367
+     (locales are step 5).
+5. [x] **Web SW + NotificationsCard + locales** — vite.config.ts →
    `strategies: "injectManifest"`, `srcDir: "src"`, `filename: "sw.ts"`; add
    `workbox-precaching` to apps/web deps; `src/sw.ts` (precacheAndRoute
    `self.__WB_MANIFEST`, cleanupOutdatedCaches, clientsClaim, SKIP_WAITING message
@@ -76,13 +109,28 @@ command passes. Keep the gate green between steps.
    enabled; gesture-gated requestPermission; never auto-prompt); locales
    `notifications.*` EN/EL (~14 keys) + parity. Verify: full gate (build proves the
    SW bundles; check:i18n parity).
-6. [ ] **e2e** — single shell invocation with the NixOS LD_LIBRARY_PATH wrapper (see
+   - Status: done. workbox-precaching@7.4.1 pinned (already in lockfile transitively);
+     clientsClaim inlined as `activate → clients.claim()` (workbox-core not pulled in);
+     navigate fallback rewritten network-first (fetch, catch → precached shell) — a
+     deliberate deviation from generateSW's precache-first navigateFallback so deploys
+     are picked up promptly; noted for the ledger. Push tag `hearth-chat` collapses
+     bursts; notificationclick focuses an existing /messages window or opens it.
+     Card states incl. 503 → "unavailable"; 8 notification keys → 375 parity; full
+     gate green (typecheck ×3, build — dist/sw.js 17.6 KB with handlers, lint 1
+     pre-existing info, tests 115 shared + 13 worker).
+6. [x] **e2e** — single shell invocation with the NixOS LD_LIBRARY_PATH wrapper (see
    note below); 8/8 must pass with the injectManifest SW (update-prompt + offline
    flows unaffected). Verify: `pnpm test:e2e` 8/8.
-7. [ ] **Wrap-up** — CLAUDE.md current-milestone + dependency-justification decision
+   - Status: 8/8 passed (phone + desktop); update-prompt/offline flows unaffected;
+     api_error TypeError lines = known tolerated Wrangler noise.
+7. [x] **Wrap-up** — CLAUDE.md current-milestone + dependency-justification decision
    rows; M6.md ledger ticks + verification log rows; full gate; reviewer subagent on
    the full M6 diff; single commit; owner pushes; verify CI + Deploy staging green
    (anonymous GitHub API, head_sha query) + staging health.
+   - Status: CLAUDE.md milestone + 2 dependency rows written; reviewer found 1
+     blocker (chats 201-failure after delivery) + 3 nits — all fixed; gate re-green
+     (375 keys, 115 shared + 13 worker, 1 pre-existing lint info); committed below;
+     CI/deploy verification pending owner push.
 8. [ ] **Staging live test** — owner generates VAPID keys (`pnpm vapid:generate`),
    sets `VAPID_PUBLIC_KEY`/`VAPID_SUBJECT` vars in wrangler.jsonc staging env +
    `VAPID_PRIVATE_KEY` secret (`wrangler secret put --env staging`), agent redeploys,

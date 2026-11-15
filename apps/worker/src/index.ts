@@ -6,11 +6,13 @@ import { secureHeaders } from "hono/secure-headers";
 import { createAuth } from "./auth";
 import { ChatRoom } from "./chat-room";
 import type { Env } from "./env";
+import { handlePushBatch } from "./lib/push-jobs";
 import { requireSameOrigin } from "./middleware/session";
 import { campusesRoutes } from "./routes/campuses";
 import { chatsRoutes } from "./routes/chats";
 import { matchesRoutes } from "./routes/matches";
 import { meRoutes } from "./routes/me";
+import { pushRoutes } from "./routes/push";
 import { roomsRoutes } from "./routes/rooms";
 import type { AppEnv } from "./types";
 
@@ -73,6 +75,7 @@ const routes = app
   .route("/api/v1/matches", matchesRoutes)
   .route("/api/v1/chats", chatsRoutes)
   .route("/api/v1/rooms", roomsRoutes)
+  .route("/api/v1/me/push", pushRoutes)
   .notFound((c) =>
     c.json(
       {
@@ -114,7 +117,9 @@ export default {
     // Deliberately empty: M3 computes matches on read (docs/specs/M3.md);
     // a batch only becomes interesting at MATCH_POOL_THRESHOLD.
   },
-  async queue() {
-    // Queue consumers arrive with their future milestones (chat, email jobs).
+  async queue(batch, env) {
+    // Chat notification jobs (docs/specs/M6.md): unread-gated web push,
+    // delivered off the JOBS queue so sends never wait on push services.
+    await handlePushBatch(batch, env);
   },
 } satisfies ExportedHandler<Env>;

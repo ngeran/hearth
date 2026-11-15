@@ -10,6 +10,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      // M6: custom service worker (src/sw.ts) so push + notificationclick can
+      // live beside workbox precaching. The manual update-prompt contract is
+      // preserved: sw.ts only calls skipWaiting on the SKIP_WAITING message.
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       registerType: "prompt",
       injectRegister: false,
       includeAssets: ["favicon.svg", "icons/*.png"],
@@ -56,11 +62,6 @@ export default defineConfig({
         // builds emit a ~5 KB unminified SW instead.
         mode: process.env.CI ? "production" : "development",
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: false,
       },
       devOptions: {
         enabled: false,

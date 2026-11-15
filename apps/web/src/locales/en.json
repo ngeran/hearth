@@ -538,6 +538,16 @@
       "confirm": "Delete"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "body": "New messages, quietly.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off",
+    "enabled": "On for this device.",
+    "denied": "Blocked in your browser settings. You can re-enable them from this site's permissions.",
+    "unsupported": "This browser can't receive notifications yet.",
+    "unavailable": "Notifications aren't configured yet — check back soon."
+  },
   "offline": {
     "title": "You're offline",
     "body": "Hearth will pick up where you left off. Check your connection and try again.",

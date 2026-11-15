@@ -7,15 +7,16 @@ the always-current project guide. Work only on the current milestone and read on
 
 ## Current milestone
 
-M5 — Rooms (household listings) per `docs/specs/M5.md`: implementation complete (PLAN steps 1–7;
-owner approved all six decision rows on 2026-11-15) — single-lister listings with 0–3 photos,
-browse + details + say-hi via M4 chat, matches "has room" filter, 4th nav tab; team-up groups
-deferred. Pending: push → CI + staging deploy → seeded listings → owner spot-check before M6.
-M4 (1:1 chat on the ChatRoom Durable Object) shipped in `d94d8a8` — CI + Deploy staging green,
-owner-approved; M3 (matching engine, matches UI, compatibility report)
-shipped in `0f663f0`, is live on staging with seeded synthetic matches, and is owner-approved. M2
-(lifestyle questionnaire) shipped in `30e6998`. The 8-tester round moves to the end of the M2–M6
-roadmap the owner approved on 2026-11-14. M1 Worker and Playwright tests stay deferred at the
+M6 — Web push notifications per `docs/specs/M6.md`: implementation complete (PLAN steps 1–6;
+owner approved all six decision rows on 2026-11-15) — chat-message pushes only, sender-name-only
+payloads, unread-gated delivery via the JOBS queue consumer, VAPID keys per environment,
+injectManifest service worker with the manual update contract preserved, NotificationsCard on the
+profile. Pending: wrap-up commit → push → CI + staging deploy → owner VAPID setup + two-device
+live push test → owner approval, then the 8-tester round (the M2–M6 roadmap the owner approved on
+2026-11-14 is then complete). M5 (rooms) shipped in `f4df538` with seeded listings; M4 (1:1 chat on
+the ChatRoom Durable Object) shipped in `d94d8a8`; M3 (matching engine, matches UI, compatibility
+report) shipped in `0f663f0` with seeded synthetic matches; M2 (lifestyle questionnaire) shipped in
+`30e6998`. M1 Worker and Playwright tests stay deferred at the
 user's request (see `docs/specs/M1.md`); M4 adds a Durable Object unit test plus shared unit tests,
 and the existing e2e smoke suite stays green.
 
@@ -75,6 +76,12 @@ pnpm icons                 # regenerate PWA PNG icons
   light mode because white text on `#C8553D` is 4.35:1, below WCAG AA for normal text.
 - 2026-11-09 — Headings use Source Serif 4 and body text uses Inter, both self-hosted via Fontsource and
   both include Greek subsets. No third-party font requests.
+- 2026-11-15 — `webpush-webcrypto` (apps/worker, runtime): zero-dependency WebCrypto Web Push
+  library, the only pure-JS push sender verified to work on Workers (`web-push` is Node-centric
+  and unsupported there per its own issue tracker). Justified for M6; lockfile committed.
+- 2026-11-15 — `workbox-precaching` (apps/web, SW bundle only): precache manifest injection for
+  the custom `sw.ts` under vite-plugin-pwa `injectManifest`; version-matched to the existing
+  `workbox-window` 7.4.1. Justified for M6; lockfile committed.
 - 2026-11-14 — All Cloudflare resources live on the `ngeran@gmail.com` account
   (`ef33c6140605cc4ba922ad3320c0be88`), pinned via `account_id` in `wrangler.jsonc` so local
   wrangler commands can never hit another account (the dev machine has multiple Cloudflare
