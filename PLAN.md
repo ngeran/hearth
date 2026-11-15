@@ -1,126 +1,99 @@
-# PLAN — M5: Rooms (household listings)
+# PLAN — M6 Web Push Notifications
 
-Spec: `docs/specs/M5.md` (canonical). Reference:
-`docs/design/mockups/10-rooms-and-groups.md`. Every step ends with the gate or
-its focused proof; tick the box only when green. Conventions: strict TS, Zod on
-every input, unix-second timestamps, parameterized queries only, no personal
-data in logs, no new dependencies/hex colors, EN/EL parity via `pnpm check:i18n`.
+Executes `docs/specs/M6.md` (read it first; decisions table approved 2026-11-15 by the
+owner unless noted). One step per session chunk; tick the box only after its verify
+command passes. Keep the gate green between steps.
 
-## Environment notes
+## Conventions and constraints
 
-- pnpm: `export PATH="/tmp/opencode/bin:$PATH"` (corepack shim dir).
+- pnpm is not on PATH in the agent shell. Every command runs as:
+  `export PATH="/tmp/opencode/bin:$PATH" && <cmd>` (corepack dir provides pnpm 12.18.0).
 - Gate: `pnpm typecheck && pnpm lint && pnpm build && pnpm check:i18n && pnpm test`.
-- `pnpm format` before lint after ledger/table edits (Biome lints md tables;
-  status lines use 4-space indents).
-- e2e needs the NixOS Playwright lib wrapper (bottom of this file), one shell
-  invocation.
-- wrangler is project-local: `corepack pnpm exec wrangler …` from repo root.
+- `pnpm format` before `lint` after any ledger/markdown edit (Biome lints table alignment).
+- Biome enforces 4-space continuation for PLAN.md status lines under a step bullet.
+- No new hex colors, no `any`, Zod on every input, no PII in logs (push endpoints and
+  auth secrets are PII-adjacent: never log them).
+- Dependency additions this milestone (both owner-approved via spec decision 3/4):
+  `webpush-webcrypto` (worker runtime, zero-dep WebCrypto push client) and
+  `workbox-precaching` (web, bundled into the SW only). Lockfile committed with the
+  one-line justifications in CLAUDE.md's decisions log at wrap-up.
+- Grounding facts (verified 2026-11-15): chats enqueue point routes/chats.ts:235-268
+  (waitUntil slot after the D1 updatedAt bump, peerId in scope); ChatRoom /state
+  shape {last, myRead} with unread rule last.seq > myRead (reuse threadStateSchema);
+  queue stub index.ts:117-119; queues config wrangler.jsonc:49-61 + :102-114 (add
+  max_retries 3 to both consumers); PWA generateSW options vite.config.ts:12-68 with
+  registerType "prompt" + manual registerSW (update-prompt.tsx) — the update contract
+  must survive; no custom SW today; _headers CSP already allows worker-src 'self';
+  migrations next is 0006; purge block me.ts:489-572 (explicit delete beside :553-556).
+- webpush-webcrypto API: `ApplicationServerKeys.generate()/toJSON()/fromJSON()` +
+  `generatePushHTTPRequest({ applicationServerKeys, payload, target: { endpoint,
+  keys: { p256dh, auth } }, adminContact, ttl, urgency })` → `{ headers, body,
+  endpoint }` + own `fetch`. No TS types ship with it → `apps/worker/src/types/`
+  declare-module shim. Verify the exact toJSON field names against the installed
+  package (node_modules/webpush-webcrypto) in step 3 before wiring fromJSON.
 
 ## Steps
 
-1. [x] **Shared room module** — `packages/shared/src/room.ts`: bounds
-   (TITLE 5–80, DESCRIPTION 120–2000, RENT_EUR 50–5000, availableFrom
-   YYYY-MM-DD), `roomCreateSchema`, `roomPatchSchema` (partial), `roomStatus`,
-   `roomListItemSchema`/`roomDetailsSchema`/`roomsResponseSchema` (strict;
-   lister summary + score/tier reuse match types), photo index `0–2` schema.
-   Tests: bounds edges, date format, strictness, patch emptiness. Export from
-   index. Verify: shared tests + `pnpm typecheck`.
-   - Status: done — 17 new tests (105 shared total), typecheck ×3 green;
-     score/tier nullable for self-facing payloads; description allows newlines
-     (title stays single-line).
-2. [x] **Migration + schema** — `migrations/0005_rooms.sql` per spec; drizzle
-   `rooms` table; node:sqlite proof (fresh 0000→0005: FK cascade on user
-   delete, CHECK status, indexes exist, second active-listing allowed at SQL
-   level — uniqueness enforced in route, re-apply rejected). Verify: proof
-   script ALL PASS + worker typecheck + worker tests.
-   - Status: 0005_rooms.sql written (0004 comment style; route-level
-     active-uniqueness documented in header); drizzle `rooms` table added
-     after chatThreads (timestamp/boolean helpers, two indexes). Proof at
-     /tmp/opencode/m5-migration-proof.mjs: ALL PROOFS PASSED (9 checks —
-     two proof-script bugs fixed along the way: explicit bills_included=1
-     vs default-0 assertion; active-count 3 not 2 after the defaults row).
-     Worker typecheck clean; 13 worker tests green (vitest D1 applies
-     0005).
-3. [x] **Worker routes** — `apps/worker/src/routes/rooms.ts`: GET / (browse,
-   score per listing), GET /mine, POST / (409 on existing active), GET /:id,
-   PATCH /:id (own), DELETE /:id (+ R2 photos), POST /:id/photos (multipart ≤3,
-   reuse sniff/re-encode guards), GET /:id/photos/:n (serve), DELETE
-   /:id/photos/:n. Mount in index.ts. Chats exception: `POST /chats` skips
-   match gates when peer has active listing (both still complete + active);
-   comment points to M5.md Decision 4. Deletion: `DELETE /api/v1/me` purges
-   room photos + rows. Verify: worker typecheck + tests + `pnpm build`
-   (bindings dry-run).
-   - Status: all routes shipped; photo keys fixed `rooms/<id>/<n>.jpg` (true
-     content type rides on httpMetadata); photo slots shift down on delete to
-     stay contiguous; PATCH reactivation honours the one-active rule (409);
-     withdrawn listings 404 for others; sanitized-files-first upload ordering.
-     Chats exception + me.ts purge landed. TS fixes: flatMap narrowing,
-     ArrayBuffer R2 put, exactOptionalPropertyTypes httpMetadata spread.
-     Worker typecheck + 13 tests + build dry-run green; lint clean.
-4. [x] **Web data + locales** — `lib/rooms.ts` (fetchRooms, fetchRoom,
-   fetchMyRoom, createRoom, updateRoom, deleteRoom, uploadRoomPhoto,
-   deleteRoomPhoto), `use-rooms.ts` (["rooms"], ["rooms","mine"]; invalidation
-   prefix), `rooms.*` locale blocks (~40 keys EN/EL, native Greek). Verify:
-   web typecheck + `pnpm check:i18n` parity.
-   - Status: lib/rooms.ts (8 fns + roomPhotoUrl helper; readError now exported
-     from me.ts for the void DELETE), use-rooms.ts (generic invalidating
-     mutation wrapper; keys ["rooms"], ["rooms","mine"], ["rooms", id]);
-     RoomPhotoIndex type added to shared room.ts. 49 new keys (rooms.* block
-     47 + nav.rooms + matches.filters.hasRoom) → parity 362. Typecheck ×3,
-     check:i18n, lint green.
-5. [x] **Rooms UI** — nav 4 tabs (Matches/Rooms/Messages/Profile, check e2e
-   nav assertions); `routes/rooms-route.tsx` (cards grid, empty/loading/error,
-   my-listing card); `components/room-card.tsx` (photo strip/placeholder,
-   chips, verified badge, score chip); details sheet (bottom-sheet mobile /
-   side panel lg, reuse matches overlay focus plumbing, M3 report vs lister,
-   say-hi → `/messages?with=`); `routes/room-edit-route.tsx` (create/edit,
-   photo picker 0–3, withdraw/reactivate, typed-DELETE confirm). Matches
-   `hasRoom` filter chip (MatchItem + worker join). Verify: full gate.
-   - Status: nav 4 tabs (BedDouble; mobile grid-cols-4) + /rooms + /rooms/edit
-     RequireAuth routes. rooms-route (my-listing section or create prompt,
-     cards grid, details overlay on all viewports with full focus-trap
-     plumbing; report vs lister via client-side scoreCompatibility adapter —
-     reportMatchItem). room-card (3-slot photo grid, chips, verified badge,
-     score chip). room-edit-route (outer-gate/inner-form, photo editor with
-     upload/delete/shift slots, withdraw/reactivate, two-step delete confirm —
-     calmer than typed-DELETE for a listing). Matches hasRoom chip + none-copy
-     (hasRoom added to matchItemSchema + one-query worker lookup post-step-3).
-     Amendment: room coords nullable end-to-end (form collects label only —
-     profiles precedent). 5 extra keys (common.edit, matches.filters.none,
-     rooms.incomplete, rooms.form.photoFailed/save) → parity 367. Full gate
-     green: typecheck ×3, lint, build, check:i18n, 106 shared + 13 worker.
-     noArrayIndexKey satisfied via PHOTO_SLOTS literal arrays (3 files).
-6. [x] **Seeds** — `scripts/seed-rooms.mjs` (4 listings on seed personas,
-   validation, dry-run default, staging execute + cleanup line) +
-   `pnpm seed:rooms`. Verify: dry-run output + node:sqlite insert proof.
-   - Status: 4 fixed listings on 4 distinct personas (nikos-a/Zografou 340€
-     bills, eleni-p/Exarcheia 380€, sofia-r/Ampelokipi 420€ bills,
-     thanos-m/Koukaki 450€), ids `seed_room_*`, coords NULL, photo_count 0,
-     one listing per lister (validated). Proof ALL PASS on fresh 0000→0005:
-     inserts, defaults, idempotent re-run, FK cascade, cleanup line.
-     Node-24 parseArgs needs `{type:"boolean"}` not `Boolean` (fixed).
-     `pnpm seed:rooms` added; dry-run lint-clean (129 files). Staging
-     execution happens at step 9 after deploy.
-7. [x] **e2e** — wrapper below; update nav spec if it asserts tab count.
-   Verify: 8/8 (or updated count) green.
-   - Status: 8/8 passed (phone + desktop) with the NixOS wrapper; nav spec
-     needed no changes (asserts visibility only, not tab count); api_error
-     TypeError lines are the known tolerated Wrangler noise.
-8. [x] **Wrap-up** — CLAUDE.md milestone paragraph, M5.md ledger/log, full
-   gate, reviewer subagent on the full diff, single commit. Owner pushes;
-   agent verifies CI + Deploy staging green (anonymous GitHub API) + health.
-   - Status: gate green twice (367 keys, 106 shared + 13 worker, typecheck
-     ×3, lint, build); e2e 8/8; reviewer blocker (overlay focus on first
-     open) + nits fixed; spec wording aligned; commit `9fbca99`. Owner push
-     - CI/deploy verification follow (step 9 notes them).
-9. [ ] **Staging spot-check** — `pnpm seed:rooms` against staging; row-count
-   check; owner browses /rooms and says hi to a seed lister. Tick M5.md.
+1. [ ] **Shared push module** — `packages/shared/src/push.ts`: VAPID key response
+   schema, pushSubscriptionSchema (endpoint z.url or https string max 2048, keys
+   strict {p256dh, auth} base64url-ish strings), pushDeleteSchema; tests (URL shape,
+   missing keys, strictness, length caps). Export from index.ts (alphabetical).
+   Verify: `pnpm --filter @hearth/shared test && pnpm typecheck`.
+2. [ ] **Migration 0006 + drizzle** — `migrations/0006_push_subscriptions.sql` per
+   spec DDL (endpoint PK, FK cascade, idx_push_subscriptions_user); drizzle
+   `pushSubscriptions` table in schema.ts after rooms; node:sqlite proof
+   (/tmp/opencode/m6-migration-proof.mjs, fresh 0000→0006): insert, upsert on endpoint
+   PK, FK cascade, index exists, re-apply rejected. Verify: proof ALL PASS + `pnpm
+   --filter @hearth/worker typecheck && pnpm --filter @hearth/worker test`.
+3. [ ] **Worker push lib + routes** — add `webpush-webcrypto` to apps/worker deps;
+   `declare module` shim; `lib/web-push.ts` (load keys from env via fromJSON — verify
+   toJSON field names first; buildPushPayload(senderName, language) with EN/EL copy;
+   sendPushToSubscription with 404/410 → prune signal; 503 when VAPID unset);
+   `routes/push.ts` mounted at `/api/v1/me/push` (GET /key, POST /, DELETE /) with
+   shared schemas; env.ts + wrangler.jsonc vars `VAPID_PUBLIC_KEY`/`VAPID_SUBJECT`
+   (top-level empty-string placeholders + staging real values land with owner keys),
+   `VAPID_PRIVATE_KEY` optional secret; `.dev.vars.example` entries;
+   `scripts/generate-vapid-keys.mjs` (prints toJSON pair + export commands);
+   package.json script `vapid:generate`. Verify: typecheck + tests + `pnpm build`.
+4. [ ] **Chats enqueue + queue consumer** — chats.ts POST /:peerId/messages:
+   `c.executionCtx.waitUntil(c.env.JOBS.send({ recipientId: peerId, senderId: id,
+   senderName: meSnapshot displayName… }))` — senderName resolved without new queries
+   if available, else job carries ids only and consumer loads names from D1;
+   index.ts `queue(batch)`: per message validate job (Zod), ChatRoom /state as
+   recipient → skip when last.seq <= myRead or last.author === recipientId, load
+   recipient subscriptions + language, send per subscription, prune on 404/410,
+   aggregate failures without PII logs; wrangler.jsonc both consumers `max_retries:
+   3`; me.ts purge explicit pushSubscriptions delete. Verify: typecheck + tests +
+   build.
+5. [ ] **Web SW + NotificationsCard + locales** — vite.config.ts →
+   `strategies: "injectManifest"`, `srcDir: "src"`, `filename: "sw.ts"`; add
+   `workbox-precaching` to apps/web deps; `src/sw.ts` (precacheAndRoute
+   `self.__WB_MANIFEST`, cleanupOutdatedCaches, clientsClaim, SKIP_WAITING message
+   handler, push → showNotification(payload.title/body/data.url), notificationclick →
+   focus-or-open `/messages?with=`); `lib/push.ts` (fetch key, subscribe, unsubscribe
+   helpers reusing requestJson/readError); `NotificationsCard` in profile-route
+   between PasskeysCard and data section (states: unsupported / off / denied /
+   enabled; gesture-gated requestPermission; never auto-prompt); locales
+   `notifications.*` EN/EL (~14 keys) + parity. Verify: full gate (build proves the
+   SW bundles; check:i18n parity).
+6. [ ] **e2e** — single shell invocation with the NixOS LD_LIBRARY_PATH wrapper (see
+   note below); 8/8 must pass with the injectManifest SW (update-prompt + offline
+   flows unaffected). Verify: `pnpm test:e2e` 8/8.
+7. [ ] **Wrap-up** — CLAUDE.md current-milestone + dependency-justification decision
+   rows; M6.md ledger ticks + verification log rows; full gate; reviewer subagent on
+   the full M6 diff; single commit; owner pushes; verify CI + Deploy staging green
+   (anonymous GitHub API, head_sha query) + staging health.
+8. [ ] **Staging live test** — owner generates VAPID keys (`pnpm vapid:generate`),
+   sets `VAPID_PUBLIC_KEY`/`VAPID_SUBJECT` vars in wrangler.jsonc staging env +
+   `VAPID_PRIVATE_KEY` secret (`wrangler secret put --env staging`), agent redeploys,
+   then owner: enable notifications on two real accounts, send messages with tabs
+   closed, confirm one quiet localized push each way + tap-through to the
+   conversation. Tick the final M6.md ledger boxes.
 
-## NixOS e2e note (Playwright browser libs)
+### NixOS e2e note (Playwright browser libs)
 
-`pnpm test:e2e` fails out of the box: the Playwright chromium in
-`~/.cache/ms-playwright` can't find system libs. Wrap the run with nix-built
-libs (one command, no repo changes):
+`pnpm test:e2e` fails out of the box: the Playwright chromium in `~/.cache/ms-playwright`
+can't find system libs. Wrap the run with nix-built libs (one command, no repo changes):
 
 ```sh
 LIBS=$(nix build --no-link --print-out-paths 'nixpkgs#glib^out' nixpkgs#nss nixpkgs#nspr \
@@ -132,12 +105,11 @@ export LD_LIBRARY_PATH=$(echo "$LIBS" | while read -r p; do printf '%s/lib:' "$p
 pnpm test:e2e
 ```
 
-Env vars do not survive between tool calls — build and run in the same shell
-invocation.
+Env vars do not survive between tool calls — build and run in the same shell invocation.
 
 ## Definition of done
 
-All 9 boxes ticked; gate green; i18n parity with the new keys; shared tests
-cover room schema edges; migration proof passes; e2e green; reviewer clean;
-committed on `main`; owner pushes; CI + Deploy staging green on the commit;
-owner browses listings and completes one say-hi to a lister on staging.
+All 8 boxes ticked; gate green; i18n parity with the `notifications.*` keys; shared
+unit tests cover the schema edges; migration proof passed; e2e 8/8 with the custom
+service worker; reviewer clean; committed on `main`; CI + Deploy staging green on the
+commit; VAPID configured; owner confirms a live two-account push round-trip.
