@@ -3,7 +3,8 @@
   "main": "./src/index.ts",
   "vars": {
     "APP_ORIGIN": "https://hearth.test",
-    "BETTER_AUTH_SECRET": "hearth-worker-test-secret-not-production"
+    "BETTER_AUTH_SECRET": "hearth-worker-test-secret-not-production",
+    "ADMIN_EMAILS": "admin@example.com"
   },
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],

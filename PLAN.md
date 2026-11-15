@@ -140,7 +140,8 @@ them finish it. The reason list must come from the same shared rule the member's
 2. [x] **Worker** — in `GET /api/v1/admin/users/:id`, compute the list with
    `getMissingOnboardingFields(toProfileSnapshot(profile))`; with no profile row,
    return every `ONBOARDING_FIELDS` value.
-   - Verify: typecheck; worker tests stay green.
+   - Verify: typecheck; worker tests stay green (23, incl. a detail-route integration test
+     with a real signed session and the real migrations).
 3. [x] **Console** — user detail shows a "Still missing" block with one chip per
    reason, only when non-empty; labels are typed keys (`admin.user.missing.*`, native
    Greek), no API-provided copy rendered.
